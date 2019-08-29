@@ -25,7 +25,7 @@ def rotate(array, n):
 
 
 def flatten(sequence, to_expand=lambda x: isinstance(x, (list, tuple))):
-  ''' 展平嵌套的list '''
+  '''展平嵌套的list'''
   iterators = [iter(sequence)]
   while iterators:
     # 循环当前的最深嵌套（最后）的迭代器
@@ -51,19 +51,17 @@ def lrange(n, m=None, step=1):
     return list(range(0, n, step))
 
 
-
-def enumrange(iterable, end=None, start=None):
-  '''按照指定的区间迭代元素, 顺便 yield 元素的索引
-  enumrange('abcdefg')          => 0a 1b 2c 3d 4e 5f 6g
-  enumrange('abcdefg', end=4)   => 0a 1b 2c 3d
-  enumrange('abcdefg', start=2) => 2c 3d 4e 5f 6g
-  enumrange('abcdefg', start=2, end=3) => 2c
-  # TODO add params first=3, last=3 etc.
+def enumfirst(iterable, first=None, skip=0):
+  ''' 迭代开头的 n 个元素, 顺便 yield 元素的索引
+      enumfirst('abcdefg')            => 0a 1b 2c 3d 4e 5f 6g
+      enumfirst('abcdefg', first=4)   => 0a 1b 2c 3d
+      enumfirst('abcdefg', skip=2)    => 2c 3d 4e 5f 6g
+      enumfirst('abcdefg', first=3, skip=2) => 2c 3d 4e
   '''
   for i, item in enumerate(iterable):
-    if start is not None and i < start:
+    if skip != 0 and i < skip:
       continue
-    elif end is not None and i >= end:
+    if first is not None and i >= first+skip:
       break
     else:
       yield i, item
@@ -145,7 +143,7 @@ def is_array(obj):
 
 
 
-def joiner(array, sep='\n', indent=0, precision=None):
+def joiner(iterable, sep='\n', indent=0, precision=None):
   ''' 以指定的间隔字符拼合列表
       提供 precision 则按照该精度格式化浮点数
   '''
@@ -155,7 +153,7 @@ def joiner(array, sep='\n', indent=0, precision=None):
       return ('{:.'+str(precision)+'f}').format(float(x))
     else:
       return x
-  return sep.join(' ' * indent + format_element(elem) for elem in array)
+  return sep.join(' ' * indent + format_element(elem) for elem in iterable)
 
 
 
@@ -202,16 +200,13 @@ def random_split(seq, p=0.1):
 
 
 def statistic(seq, reverse=False, precision=None):
-  '''
-  统计 list 中的数据
-  a = [1,1,1,1,2,2]
-  b = a*100 + list(range(1,100))
-  c = list('aaaaaaasghkghewxckbv')
-  print(statistic(a))
-  print(statistic(b))
-  print(statistic(c))
-  '''
-
+  ''' 统计 list 中的数据
+      a = [1,1,1,1,2,2]
+      b = a*100 + list(range(1,100))
+      c = list('aaaaaaasghkghewxckbv')
+      print(statistic(a))
+      print(statistic(b))
+      print(statistic(c)) '''
   from collections import Counter
   array = list(seq)
   if precision:
