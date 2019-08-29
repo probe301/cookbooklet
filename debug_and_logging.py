@@ -3,8 +3,6 @@
 """--------------
 调试和测试
 --------------"""
-import types
-
 
 class TestException(Exception):
   pass
@@ -52,14 +50,15 @@ def microtest(modulename, verbose=None, log=sys.stdout):
 
 
 
-# from pprint import pprint
-# from datetime import datetime
-# import sys
-# import inspect
+
+"""--------------
+同时 log 到 stdout 和 file.log
+--------------"""
+from pprint import pprint
+from datetime import datetime
 class create_logger:
   def __init__(self, file_path):
     self.filepath = file_path + '.log'
-
   def custom_print(self, data, prefix='', filepath=None, pretty=False):
     out = open(filepath, 'a', encoding='utf-8') if filepath else sys.stdout
     if filepath:  # 在输出到文件时增加记录时间戳, 输出到 stdout 不记录时间戳
@@ -73,9 +72,7 @@ class create_logger:
       print(data, file=out)
     # if filepath:
     #   out.close()
-
   def output(self, values, pretty=False):
-
     if len(values) == 1:
       s = values[0]
     else:
@@ -88,11 +85,9 @@ class create_logger:
       self.custom_print(s, filepath=self.filepath, pretty=pretty)
     except UnicodeEncodeError as e:
       self.custom_print(str(e), filepath=self.filepath, prefix='logger output error: ')
-
   def __ror__(self, *other):
     self.output(other, pretty=True)
     return other
-
   def __call__(self, *other, pretty=False):
     self.output(other, pretty=pretty)
 
@@ -131,64 +126,8 @@ def watch(variableName, watchOutput=sys.stdout):
     watchOutput.write(watch_format % paramDict)
 
 
-######  ##   ##  ###### ##   ##  #####  ##   ## ##      ######
-##   ## ##   ## ##      ##   ## ##   ## ##   ## ##      ##   ##
-######   #####   #####  ####### ##   ## ##   ## ##      ##   ##
-##         ##        ## ##   ## ##   ## ##   ## ##      ##   ##
-##         ##   ######  ##   ##  #####   #####  ####### ######
 
-####### #######  ###### #######
-   ##   ##      ##         ##
-   ##   ######   #####     ##
-   ##   ##           ##    ##
-   ##   ####### ######     ##
 
-# def test_cases():
-
-#   sein('## debug', figlet=True)
-#   sein('## common')
-#   sein('## data mining')
-
-#   # from pyshould import *
-#   # import pyshould.patch
-#   # from pyshould import should
-#   # result | should.be_integer()
-#   # (1+1) | should_not.equal(1)
-#   # "foo" | should.equal('foo')
-#   # len([1,2,3]) | should.be_greater_than(2);
-#   # result | should.equal(1/2 + 5)
-#   # 1 | should_not.eq(2)
-#   # # Matchers not requiring a param can skip the call parens
-#   # True | should.be_truthy
-#   # # Check for exceptions with the context manager interface
-#   # with should.throw(TypeError):
-#   #   raise TypeError('foo')
-#   # with should.not_raise:  # will report a failure
-#   #   fp = open('does-not-exists.txt')
-#   # # Apply our custom logic for a test
-#   # 'FooBarBaz' | should.pass_callback(lambda x: x[3:6] == 'Bar')
-#   # should.be_an_integer.or_string.and_equal(1)
-#   # # (integer) OR (string AND equal 1)
-#   # should.be_an_integer.or_a_float.or_a_string
-#   # # (integer) OR (float) OR (string)
-#   # should.be_an_integer.or_a_string.and_equal_to(10).or_a_float
-#   # # (integer) OR (string AND equal 10) OR (float)
-#   # should.be_an_integer.or_a_string.but_less_than(10)
-#   # # (integer OR string) AND (less than 10)
-#   # # Note: we can use spacing to make them easier to read
-#   # should.be_an_integer  .or_a_string.and_equal(0)  .or_a_float
-#   # # (integer) OR (string AND equal 0) OR (float)
-#   # # Note: in this case we use capitalization to make them more obvious
-#   # should.be_an_integer .Or_a_string.And_equal(1) .But_Not_be_a_float
-#   # # ( (integer) OR (string AND equal 1) ) AND (not float)
-#   # # Note: if no matchers are given the last one is used
-#   # should.be_equal_to(10).Or(20).Or(30)
-#   # # (equal 10) OR (equal 20) OR (equal 30)
-#   # # Note: If no combinator is given AND is used by default
-#   # should.integer.greater_than(10).less_than(20)
-#   # # (integer) AND (greater than 10) AND (less than 20)
-#   # # Note: But by using should_either we can set OR as default
-#   # should_either.equal(10).equal(20).equal(30)
 
 
 
@@ -209,7 +148,6 @@ def profiler(func):
     print(s.getvalue())
     return retval
   return wrapper
-
 
 '''
 profiler 样例
@@ -252,6 +190,10 @@ test_center()
 
 
 
+
+
+
+
 from functools import wraps
 
 def func_logger(fn):
@@ -267,7 +209,6 @@ def func_logger(fn):
     print("  time      = %.6f sec" % (te - ts))
     return result
   return wrapper
-
 
 '''
 @func_logger
@@ -310,6 +251,9 @@ sum_num(10000000)
 
 
 
+
+
+
 import sys
 import os
 import linecache
@@ -348,11 +292,24 @@ def trace_line(f):
 
 
 
-def pyshould_test_style():
+
+######  ##   ##  ###### ##   ##  #####  ##   ## ##      ######
+##   ## ##   ## ##      ##   ## ##   ## ##   ## ##      ##   ##
+######   #####   #####  ####### ##   ## ##   ## ##      ##   ##
+##         ##        ## ##   ## ##   ## ##   ## ##      ##   ##
+##         ##   ######  ##   ##  #####   #####  ####### ######
+
+####### #######  ###### #######
+   ##   ##      ##         ##
+   ##   ######   #####     ##
+   ##   ##           ##    ##
+   ##   ####### ######     ##
+
+def pyshould_test_sample():
   import unittest
   # from pyshould import *
   import pyshould.patch
-
+  from pyshould import should
   result | should.be_integer()
   (1+1) | should_not.equal(1)
   "foo" | should.equal('foo')
