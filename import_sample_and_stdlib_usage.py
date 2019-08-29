@@ -74,6 +74,13 @@ def enum_sample():
 
 
 
+def ordered_default_dict_sample():
+  from collections import OrderedDict
+  result = OrderedDict()
+  for key, val in custom_generater():
+      result.setdefault(key, []).append(val)
+
+
 
 
 """
@@ -403,7 +410,7 @@ def path_usage():
   # 判断文件是否存在：
   os.path.exists(r"c:\python\hello.py")       # True
   # 判断是否是绝对路径：
-  os.path.isabs(r".\python\")                 # False
+  os.path.isabs(r".\python")                  # False
   # 判断是否是目录：
   os.path.isdir(r"c:\python")                 # True
   # 判断是否是文件：
@@ -581,10 +588,8 @@ def string_usage():
   # '2010-07-04 12:15:58'
 
   octets = [192, 168, 0, 1]
-  '{:02X}{:02X}{:02X}{:02X}'.format(*octets)
-  # 'C0A80001'
-  int(_, 16)
-  # 3232235521
+  octets_str = '{:02X}{:02X}{:02X}{:02X}'.format(*octets) # 'C0A80001'
+  int(octets_str, 16)                                     # 3232235521
 
   width = 5
   for num in range(5, 12):

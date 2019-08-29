@@ -109,24 +109,28 @@ def trim_leading_spaces(text):
 
 
 
-def truncate(text, limit=20, with_end=False, ellipsis='... ', encode=None):
+def truncate(text, limit=20, with_end=False, ellipsis='...', encode=None):
   ''' 截断字符串尾部, 保留指定长度
       encode='gbk' 计算长度时, 中文字符视为长度2, 这样方便对齐
       encode='utf8' 计算长度时, 中文字符视为长度3
       encode=None 使用普通的 len(text) 计算长度
-      with_end=True 保留开头和结束, 省略中间的字符 TODO
+      TODO with_end=True 保留开头和结束, 省略中间的字符
   '''
-  def encode_len(t): return len(t.encode(encode) if encode else t)
+  def encode_len(t): 
+    return len(t.encode(encode) if encode else t)
   limit = max(limit, encode_len(ellipsis))
   len_text = encode_len(text)
   if len_text <= limit:
     return text
   else:
-    while encode_len(text[:len_text]) > limit - encode_len(ellipsis):
-      len_text -= 1
-    return text[:len_text] + ellipsis
-
-
+    i = 0
+    dest_length =  limit - encode_len(ellipsis)
+    while encode_len(text[:i]) < dest_length:
+      i += 1
+    if encode_len(text[:i]) == dest_length:
+      return text[:i] + ellipsis
+    else:
+      return text[:i-1] + ellipsis
 
 
 
@@ -146,9 +150,6 @@ def sections(iterable, is_title=lambda line: line.startswith('#')):
     else:
       result[title].append(line)
   return result
-
-
-
 
 
 
@@ -208,7 +209,7 @@ class IncludeOrderedLoader(yaml.Loader):
 
   def _include(self, loader, node):
     filename = os.path.join(self._root, self.construct_scalar(node))
-    return yaml.load(encode_open(filename), IncludeOrderedLoader)
+    return yaml.load(open(filename, encoding='utf-8'), IncludeOrderedLoader)
 
   def _construct_mapping(self, loader, node):
     loader.flatten_mapping(node)
