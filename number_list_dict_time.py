@@ -1,118 +1,6 @@
 
-
-
-def ordered_default_dict_sample():
-  from collections import OrderedDict
-
-  result = OrderedDict()
-  for key, val in custom_generater():
-      result.setdefault(key, []).append(val)
-
-
-
-
-def systematic_sample(data, n):
-  # 系统抽样 systematic sampling
-  # 又称机械抽样、等距抽样，
-  # 先将总体的观察单位按某一顺序号分成n个部分，
-  # 依次用相等间距，从每一部分个抽取一个观察单位组成样本。
-  len_data = len(data)
-  sample = []
-  for i in range(n):
-    sample.append(data[int((len_data-1) * i / (n-1))])
-  return sample
-
-
-# def joiner(iterable, sep=', ', group_len=None, group_sep='\n'):
-#   '''拼合列表
-#   如果提供 group_len, 先按照group长度分组拼合每个group内部元素, 再拼合不同的group'''
-#   if not group_len:
-#     return sep.join(str(elem) for elem in iterable)
-#   else:
-
-#     return group_sep.join(joiner(g, sep) for g in windows(iterable, length=group_len, yield_tail=True))
-
-
-def joiner(array, sep='\n', indent=0, precision=None):
-  ''' 以指定的间隔字符拼合列表
-      提供 precision 则按照该精度格式化浮点数
-  '''
-  def format_element(x):
-    x = str(x)
-    if precision and x.replace('.', '', 1).isdigit():
-      return ('{:.'+str(precision)+'f}').format(float(x))
-    else:
-      return x
-  return sep.join(' ' * indent + format_element(elem) for elem in array)
-
-
-def ensure_plural(obj):
-  ''' 把 str, num 等变成 list, 用于参数接受 iterable 的情形'''
-  if isinstance(obj, (tuple, list)):
-    return obj
-  elif isinstance(obj, (int, float, str)):
-    return [obj]
-  else:
-    raise ValueError('cannot plural {}'.format(obj))
-
-
-def match_previous(lines, pattern, history=5):
-  '''返回匹配的行以及之前的n行'''
-  from collections import deque
-  previous_lines = deque(maxlen=history)
-  for li in lines:
-    if pattern in li:
-      yield li, previous_lines
-    previous_lines.append(li)
-  # '''usage'''
-  # with open(r'../../cookbook/somefile.txt') as f:
-  #   for line, prevlines in search(f, 'Python', 5):
-  #     for pline in prevlines:
-  #       print(pline, end='')
-  #     print(line, end='')
-  #     print('-' * 20)
-
-
-def top(iterable, n=1, smallest=False, key=None):
-  ''' 返回列表中最大或最小的n个元素
-  适合于n比较小的情况
-  如果只需要最大或最小的一个元素, 应该用max(), min()
-  如果需要非常多的元素, 应该 sorted(iterable)[:n] '''
-  import heapq
-  if smallest:
-    return heapq.nsmallest(n, iterable, key=key)
-  else:
-    return heapq.nlargest(n, iterable, key=key)
-  # portfolio = [
-  #     {'name': 'IBM', 'shares': 100, 'price': 91.1},
-  #     {'name': 'AAPL', 'shares': 50, 'price': 543.22},
-  #     {'name': 'FB', 'shares': 200, 'price': 21.09},
-  #     {'name': 'HPQ', 'shares': 35, 'price': 31.75},
-  #     {'name': 'YHOO', 'shares': 45, 'price': 16.35},
-  #     {'name': 'ACME', 'shares': 75, 'price': 115.65}
-  # ]
-  # cheap = heapq.nsmallest(3, portfolio, key=lambda s: s['price'])
-  # expensive = heapq.nlargest(3, portfolio, key=lambda s: s['price'])
-
-
-def is_array(obj):
-  '''
-  print(is_array([12, 4]))  # => True
-  print(is_array([]))       # => True
-  print(is_array((24, )))   # => True
-
-  print(is_array(1.1))      # => False
-  print(is_array(None))     # => False
-  print(is_array('qwihr'))  # => False
-  '''
-  if isinstance(obj, str):
-    return False
-  return isinstance(obj, (list, set, tuple))
-
-
-
 """--------------
-处理列表和字典
+处理列表和可迭代对象
 --------------"""
 
 
@@ -124,6 +12,7 @@ def dedupe(items, key=None):
     if val not in seen:
       yield item
       seen.add(val)
+
 
 
 def rotate(array, n):
@@ -153,12 +42,14 @@ def flatten(sequence, to_expand=lambda x: isinstance(x, (list, tuple))):
       iterators.pop()
 
 
-def listrange(n, m=None, step=1):
+
+def lrange(n, m=None, step=1):
   '''range转list'''
   if m is not None:
     return list(range(n, m, step))
   else:
     return list(range(0, n, step))
+
 
 
 def enumrange(iterable, end=None, start=None):
@@ -178,9 +69,11 @@ def enumrange(iterable, end=None, start=None):
       yield i, item
 
 
+
 def transpose(data):
   '''矩阵转置'''
   return map(list, zip(*data))
+
 
 
 def windows(iterable, length=2, overlap=0, yield_tail=False):
@@ -190,7 +83,8 @@ def windows(iterable, length=2, overlap=0, yield_tail=False):
   yield_tail: 最后不足 length 的那部分元素是否也要 yield'''
   import itertools
   if length <= overlap:
-    raise AttributeError('overlap {} cannot larger than length {}'.format(overlap, length))
+    raise AttributeError(
+        'overlap {} cannot larger than length {}'.format(overlap, length))
   it = iter(iterable)
   results = list(itertools.islice(it, length))
   while len(results) == length:
@@ -202,11 +96,83 @@ def windows(iterable, length=2, overlap=0, yield_tail=False):
 
 
 
+def ensure_plural(obj):
+  ''' 把 str, num 等变成 list, 用于参数需要接受 iterable 的情形'''
+  if isinstance(obj, (tuple, list)):
+    return obj
+  elif isinstance(obj, (int, float, str)):
+    return [obj]
+  else:
+    raise ValueError('cannot plural {}'.format(obj))
+
+
+
+def top(iterable, n=1, smallest=False, key=None):
+  ''' 返回列表中最大或最小的n个元素, 适合于n比较小的情况
+  如果只需要最大或最小的一个元素, 应该用 max(), min()
+  如果需要非常多的元素, 应该 sorted(iterable)[:n] '''
+  import heapq
+  if smallest:
+    return heapq.nsmallest(n, iterable, key=key)
+  else:
+    return heapq.nlargest(n, iterable, key=key)
+  # portfolio = [
+  #     {'name': 'IBM', 'shares': 100, 'price': 91.1},
+  #     {'name': 'AAPL', 'shares': 50, 'price': 543.22},
+  #     {'name': 'FB', 'shares': 200, 'price': 21.09},
+  #     {'name': 'HPQ', 'shares': 35, 'price': 31.75},
+  #     {'name': 'YHOO', 'shares': 45, 'price': 16.35},
+  #     {'name': 'ACME', 'shares': 75, 'price': 115.65}
+  # ]
+  # cheap = heapq.nsmallest(3, portfolio, key=lambda s: s['price'])
+  # expensive = heapq.nlargest(3, portfolio, key=lambda s: s['price'])
+
+
+
+def is_array(obj):
+  '''
+  print(is_array([12, 4]))  # => True
+  print(is_array([]))       # => True
+  print(is_array((24, )))   # => True
+
+  print(is_array(1.1))      # => False
+  print(is_array(None))     # => False
+  print(is_array('qwihr'))  # => False
+  '''
+  if isinstance(obj, str):
+    return False
+  return isinstance(obj, (list, set, tuple))
+
+
+
+def joiner(array, sep='\n', indent=0, precision=None):
+  ''' 以指定的间隔字符拼合列表
+      提供 precision 则按照该精度格式化浮点数
+  '''
+  def format_element(x):
+    x = str(x)
+    if precision and x.replace('.', '', 1).isdigit():
+      return ('{:.'+str(precision)+'f}').format(float(x))
+    else:
+      return x
+  return sep.join(' ' * indent + format_element(elem) for elem in array)
+
+
+
+
+
+
+
+
+
+
+
+
+
 """--------------
 数值操作
 --------------"""
-
-
+import random
 def rand(start, end=None):
   if isinstance(start, int):
     if end:
@@ -220,7 +186,9 @@ def rand(start, end=None):
       return random.uniform(0.0, start)
 
 
+
 def random_split(seq, p=0.1):
+  '''按照概率 p 随机拆分集合'''
   train = []
   test = []
   roll = random.random
@@ -230,6 +198,7 @@ def random_split(seq, p=0.1):
     else:
       train.append(row)
   return train, test
+
 
 
 def statistic(seq, reverse=False, precision=None):
@@ -255,38 +224,68 @@ def statistic(seq, reverse=False, precision=None):
     s += '  sum:{:.4f}  ave:{:.4f}  min:{}  max:{}'.format(sum(array), sum(array)/length, min(array), max(array))
   return s
 
-  
-# import arrow
 
-# t = arrow.utcnow()
-# <Arrow [2017-02-01T08:30:37.627622+00:00]>
-# arrow.now()
-# <Arrow [2017-02-01T16:32:02.857411+08:00]>
-# t = arrow.utcnow()t.timestamp
-# 1485937837
-# t = arrow.now()
-# t.format()
-# '2017-02-01 17:00:42+08:00'
-# t.format("YYYY-MM-DD HH:mm")
-# '2017-02-01 17:00'
 
-# arrow.get("2017-01-20 11:30", "YYYY-MM-DD HH:mm")
-# <Arrow[2017-01-20T11:30:00+00:00] >
-# arrow.get("1485937858.659424")
-# <Arrow[2017-02-01T08:30:58.659424+00:00] >
-# arrow.get(1485937858.659424)
-# <Arrow[2017-02-01T08:30:58.659424+00:00] >
-# t = arrow.now()
-# <Arrow[2017-02-01T17:19:19.933507+08:00] >
-# t.shift(days=-1)  # 前一天
-# <Arrow[2017-01-31T17:19:19.933507+08:00] >
-# t.shift(weeks=-1)  # 前一周
-# <Arrow[2017-01-25T17:19:19.933507+08:00] >
-# t.shift(months=-2)  # 前两个月
-# <Arrow[2016-12-01T17:19:19.933507+08:00] >
-# t.shift(years=1)  # 明年
-# <Arrow[2018-02-01T17:19:19.933507+08:00] >
 
+
+
+
+"""--------------
+time datetime 处理日期
+--------------"""
+import time
+def random_sleep(min, max=None):
+  '''休眠指定的时间,或范围内的随机值'''
+  if max is None:
+    return time.sleep(float(min))
+  else:
+    t = random.uniform(float(min), float(max))
+    return time.sleep(t)
+
+import datetime
+def get_datetime():
+  datetime.datetime.now()              # datetime(2019, 8, 29, 19, 12, 27, 384604)
+  datetime.datetime.now().timestamp()  # 1567077158.420575
+  return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") # '2019-08-29 19:11:28'
+
+def to_timestamp(i):
+  return datetime.datetime.fromtimestamp(i / 1000 / 1000).strftime("%Y-%m-%d %H:%M:%S.%f")[11:]
+# to_timestamp(1567077158420575)  -> '19:12:38.420575'
+
+
+
+
+
+def arrow_usage():
+  import arrow
+  t = arrow.utcnow()             # <Arrow [2017-02-01T08:30:37.627622+00:00]>
+  arrow.now()                    # <Arrow [2017-02-01T16:32:02.857411+08:00]>
+  t = arrow.utcnow()
+  t.timestamp                    # 1485937837
+  t = arrow.now()
+  t.format()                     # '2017-02-01 17:00:42+08:00'
+  t.format("YYYY-MM-DD HH:mm")   # '2017-02-01 17:00'
+
+  arrow.get("2017-01-20 11:30", "YYYY-MM-DD HH:mm")
+  # <Arrow[2017-01-20T11:30:00+00:00] >
+  arrow.get("1485937858.659424")
+  # <Arrow[2017-02-01T08:30:58.659424+00:00] >
+  arrow.get(1485937858.659424)
+  # <Arrow[2017-02-01T08:30:58.659424+00:00] >
+
+  t = arrow.now()               # <Arrow[2017-02-01T17:19:19.933507+08:00] >
+  t.shift(days=-1)    # 前一天   # <Arrow[2017-01-31T17:19:19.933507+08:00] >
+  t.shift(weeks=-1)   # 前一周   # <Arrow[2017-01-25T17:19:19.933507+08:00] >
+  t.shift(months=-2)  # 前两月   # <Arrow[2016-12-01T17:19:19.933507+08:00] >
+  t.shift(years=1)    # 明年     # <Arrow[2018-02-01T17:19:19.933507+08:00] >
+
+
+
+
+
+"""--------------
+使用 arrow 处理日期
+--------------"""
 
 import arrow
 def time_from_stamp(s):
@@ -307,7 +306,6 @@ def time_to_humanize(t):
   return t.humanize()
   # return arrow.get(d.strftime('%Y-%m-%d %H:%M:%S') + zone).humanize()
 
-
 def time_shift():
   t = arrow.now()
   # t.shift(days=-1)
@@ -315,6 +313,7 @@ def time_shift():
   # t.shift(months=-2)
   # t.shift(years=1)
 
+import re
 def time_shift_from_humanize(t, shift_expr):
   ''' 返回 t 变动了 shift_expr 后的时刻
       shift_expr 只接受 秒 分 时 和 天
@@ -346,16 +345,20 @@ def duration_from_humanize(expr):
   return diff.days * 24 * 3600 + diff.seconds
 
 
-def time_random_sleep(min, max=None):
-  '''休眠指定的时间,或范围内的随机值'''
-  if max is None:
-    return time.sleep(float(min))
-  else:
-    t = random.uniform(float(min), float(max))
-    return time.sleep(t)
 
 
 
-def get_datetime():
-    import datetime
-    return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
+
+
+def systematic_sample(data, n):
+  # 系统抽样 systematic sampling
+  # 又称机械抽样、等距抽样，
+  # 先将总体的观察单位按某一顺序号分成n个部分，
+  # 依次用相等间距，从每一部分个抽取一个观察单位组成样本。
+  len_data = len(data)
+  sample = []
+  for i in range(n):
+    sample.append(data[int((len_data-1) * i / (n-1))])
+  return sample
