@@ -57,6 +57,65 @@ python 搭 FTP server
 
 
 
+"""
+flask simple demo
+"""
+
+from flask import Flask
+from flask import request
+from flask import jsonify
+from flask import render_template
+from flask import Response
+
+app = Flask(__name__)
+@app.route('/')
+@app.route('/index')
+def index():
+  user = {'nickname': 'myname'}
+  return render_template("index.html",
+                         title='Home',
+                         user=user)
+
+@app.route('/hello')
+def hello():
+  return 'Hello World'
+
+@app.route('/task/<int:task_id>')
+def get_task(task_id):
+  ''' render json '''
+  print('get /task/<task_id>' + str(task_id))
+  return jsonify(from_db(task_id).to_dict())
+
+@app.route('/topic/<int:topic_id>')
+def list_by_topic(topic_id):
+  ''' render html '''
+  return render_template("topics.html", title='Topics', topic=from_db(topic_id))
+
+@app.route('/rss')
+def generate_feed():
+  ''' render feed '''
+  from feedgen.feed import FeedGenerator
+
+  feed_name = 'feed_name'
+  fg = FeedGenerator()
+  fg.id('xxxurl/' + feed_name)
+  fg.title(feed_name)
+  fg.link(href='xxxurl/' + feed_name, rel='alternate')
+  # fg.logo('http://ex.com/logo.jpg')
+  fg.subtitle('by FeedGenerator')
+  fg.link(href='xxxurl/' + feed_name + 'atom', rel='self')
+  fg.language('zh-cn')
+
+  for page in sorted(pages):
+    fe = fg.add_entry()
+    fe.id(page.metadata['url'])
+    fe.title(page.metadata['title'])
+    fe.link(href=page.metadata['url'])
+    fe.description('\n\n' + page.to_html() + '\n')
+
+  return fg.rss_str(pretty=True)
+
+
 
 
 

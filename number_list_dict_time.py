@@ -51,7 +51,7 @@ def lrange(n, m=None, step=1):
     return list(range(0, n, step))
 
 
-def enumfirst(iterable, first=None, skip=0):
+def enumer(iterable, first=None, skip=0):
   ''' 迭代开头的 n 个元素, 顺便 yield 元素的索引
       enumfirst('abcdefg')            => 0a 1b 2c 3d 4e 5f 6g
       enumfirst('abcdefg', first=4)   => 0a 1b 2c 3d
