@@ -44,6 +44,27 @@ def partial_sample():
 
 
 
+def dict_merge_sample():
+  LISTER_DEFAULT_OPTION = {'1': 100, '2': 200}
+  lister_option = {'3': 300, '2': 900}
+  # lister_option 必须是 string 类型的 key
+  lister_default_option = dict(LISTER_DEFAULT_OPTION, **lister_option)
+  print(lister_default_option)
+
+# 或者
+def dict_merge_sample2():
+  from copy import deepcopy
+  def dict_merge(a, b=None):
+    a = deepcopy(a)
+    if b is None:
+      b = {}
+    a.update(b)
+    return a
+
+
+
+
+
 def namedtuple_sample():
   from collections import namedtuple
   Subscriber = namedtuple('Subscriber', ['addr', 'joined'])
@@ -72,6 +93,14 @@ def enum_sample():
 
 
 
+def platform_sample():
+  import platform
+  if(platform.system() == "Windows"):
+    print ("Call Windows tasks")
+  elif(platform.system() == "Linux"):
+    print ("Call Linux tasks")
+  else:
+    print ("Other System tasks")
 
 
 def ordered_default_dict_sample():
@@ -606,3 +635,26 @@ def string_usage():
 
 
 
+
+
+def sys_and_platform_usage():
+  import sys
+  import platform
+  sys.argv                            # 从程序外部向程序传递参数
+  # sys.exit([arg])                   # 退出，arg=0为正常退出
+  sys.getdefaultencoding()            # 'utf-8' 获取系统当前编码
+  sys.setdefaultencoding()            # 设置系统默认编码，执行reload(sys), setdefaultencoding('utf8')，将系统默认编码设置为utf8
+  sys.getfilesystemencoding()         # 获取文件系统使用编码方式，Windows下返回 'mbcs'，mac下返回'utf-8'. 
+  sys.path                            # 获取指定模块搜索路径的字符串集合
+  sys.platform                        # 'win32' 获取当前系统平台
+  sys.stdin, sys.stdout, sys.stderr   # 与标准I/O流对应的流对象
+
+  platform.system()    # 获取操作系统类型，'Windows' 'Linux'
+  platform.platform()  # 获取操作系统，'Windows-10-10.0.18362-SP0' 'Darwin-9.8.0-i386-32bit'
+  platform.version()   # 获取系统版本信息 '10.0.18362'
+  platform.mac_ver() 
+  platform.win32_ver() # ('10', '10.0.18362', 'SP0', 'Multiprocessor Free')
+
+
+
+  
