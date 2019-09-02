@@ -127,6 +127,16 @@ def top(iterable, n=1, smallest=False, key=None):
 
 
 
+from copy import deepcopy
+def dict_merge(a, b=None):
+  a = deepcopy(a)
+  if b is None:
+    b = {}
+  a.update(b)
+  return a
+
+
+
 def is_array(obj):
   '''
   print(is_array([12, 4]))  # => True

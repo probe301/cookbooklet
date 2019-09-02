@@ -1,5 +1,28 @@
 
 
+def is_windows():
+  import sys
+  return sys.platform == 'win32'
+
+
+import subprocess
+def run_command(cmd, verbose=False):
+  if verbose: print('> running: ', cmd)
+  try:
+    output = subprocess.check_output(
+        cmd, stderr=subprocess.STDOUT, shell=True, timeout=3,
+        universal_newlines=True)
+  except subprocess.CalledProcessError as exc:
+    if verbose: print("status: FAIL", exc.returncode, exc.output)
+    raise RuntimeError(f'status: FAIL, {exc.returncode}, {exc.output}')
+  else:
+    if verbose: print("output: \n{}\n".format(output))
+    return output
+
+
+
+
+
 def cronjob():
     '''守护进程'''
     from apscheduler.schedulers.blocking import BlockingScheduler
