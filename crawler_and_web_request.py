@@ -39,9 +39,11 @@ from peewee import JOIN
 
 # requests download image (file)
 import shutil
+import requests
+session = requests.Session()
 def download_image(url, path):
   print(f'download img {url} ...')
-  r = sess.get(url, stream=True)
+  r = session.get(url, stream=True)
   if r.status_code == 200:
     with open(path, 'wb') as f:
       r.raw.decode_content = True
