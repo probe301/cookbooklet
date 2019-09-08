@@ -109,28 +109,25 @@ def trim_leading_spaces(text):
 
 
 
-def truncate(text, limit=20, with_end=False, ellipsis='...', encode=None):
+def truncate(text, limit=20, with_end=False, ellipsis='... ', encode=None):
   ''' 截断字符串尾部, 保留指定长度
       encode='gbk' 计算长度时, 中文字符视为长度2, 这样方便对齐
       encode='utf8' 计算长度时, 中文字符视为长度3
       encode=None 使用普通的 len(text) 计算长度
       TODO with_end=True 保留开头和结束, 省略中间的字符
   '''
-  def encode_len(t): 
-    return len(t.encode(encode) if encode else t)
+  encode_len = lambda t: len(t.encode(encode) if encode else t)
   limit = max(limit, encode_len(ellipsis))
   len_text = encode_len(text)
   if len_text <= limit:
     return text
   else:
-    i = 0
     dest_length =  limit - encode_len(ellipsis)
-    while encode_len(text[:i]) < dest_length:
-      i += 1
-    if encode_len(text[:i]) == dest_length:
-      return text[:i] + ellipsis
-    else:
-      return text[:i-1] + ellipsis
+    current_index = len(text)
+    while encode_len(text[:current_index]) > dest_length:
+      current_index -= 1
+    return text[:current_index] + ellipsis
+
 
 
 
@@ -154,6 +151,40 @@ def sections(iterable, is_title=lambda line: line.startswith('#')):
 
 
 
+def clean_xml(text):
+  ''' 清理用于 xml 的有效字符
+      曾遇到标题里有字符 backspace \x08, 在 CentOS 中无法生成 xml feed
+      用于文本内容, 
+      一般不用于路径或 yaml csv 中 '''
+  def valid_xml_char_ordinal(c):
+    # conditions ordered by presumed frequency
+    codepoint = ord(c)
+    return (0x20 <= codepoint <= 0xD7FF or
+            codepoint in (0x9, 0xA, 0xD) or
+            0xE000 <= codepoint <= 0xFFFD or
+            0x10000 <= codepoint <= 0x10FFFF)
+  return ''.join(c for c in text if valid_xml_char_ordinal(c))
+
+
+DEFAULT_INVALID_CHARS = {':', '*', '?', '"', "'", '<', '>', '|', '\r', '\n', '\t'}
+EXTRA_CHAR_FOR_FILENAME = {'/', '\\'}
+
+def remove_invalid_char(dirty, invalid_chars=None, for_path=False, combine_whitespaces=True):
+  ''' 清理无效字符, 用于文件路径, 配置字段, 或 yaml csv 等 
+      for_path = True   允许出现 `/` 和 `\\`
+      for_path = False  只保留纯文件名, 不能出现 `/` 和 `\\`'''
+  text = clean_xml(dirty)
+  if invalid_chars is None:
+    invalid_chars = set(DEFAULT_INVALID_CHARS)
+  else:
+    invalid_chars = set(invalid_chars)
+    invalid_chars.update(DEFAULT_INVALID_CHARS)
+  if not for_path:
+    invalid_chars.update(EXTRA_CHAR_FOR_FILENAME)
+  text = ''.join([c for c in text if c not in invalid_chars]).strip()
+  if combine_whitespaces:
+    text = re.sub(r'\s+', ' ', text).strip()
+  return text
 
 
 
@@ -456,22 +487,6 @@ def from_relative_path(path):
   return path
 
 
-
-DEFAULT_INVALID_CHARS = {':', '*', '?', '"', '<', '>', '|', '\r', '\n'}
-EXTRA_CHAR_FOR_FILENAME = {'/', '\\'}
-def remove_invalid_char(dirty, invalid_chars=None, for_path=False):
-  ''' 清理文件名中的无效字符
-      for_path = True   允许出现 `/` 和 `\\`
-      for_path = False  只保留纯文件名, 不能出现 `/` 和 `\\`
-  '''
-  if invalid_chars is None:
-    invalid_chars = set(DEFAULT_INVALID_CHARS)
-  else:
-    invalid_chars = set(invalid_chars)
-    invalid_chars.update(DEFAULT_INVALID_CHARS)
-  if not for_path:
-    invalid_chars.update(EXTRA_CHAR_FOR_FILENAME)
-  return ''.join([c for c in dirty if c not in invalid_chars]).strip()
 
 
 
