@@ -123,9 +123,9 @@ def join_sample():
 
 # %matplotlib inline
 # %load_ext autoreload
-# %autoreload 2
+# %autoreload 2                                     # 自动重载入模块
 # from IPython.core.interactiveshell import InteractiveShell
-# InteractiveShell.ast_node_interactivity = "all"  # 在 output 显示多个表达式
+# InteractiveShell.ast_node_interactivity = "all"   # output 显示每一行表达式的输出
 
 # jupyter notebook css fix
 

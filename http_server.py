@@ -66,6 +66,7 @@ from flask import request
 from flask import jsonify
 from flask import render_template
 from flask import Response
+from flask import about
 
 app = Flask(__name__)
 @app.route('/')
@@ -114,6 +115,12 @@ def generate_feed():
     fe.description('\n\n' + page.to_html() + '\n')
 
   return fg.rss_str(pretty=True)
+  # 或者
+  if feed_path:
+    return Response(open(feed_path, encoding='utf-8').read(), mimetype='application/xml')
+  else:
+    abort(404)
+    # raise RuntimeError(f'cannot generate_feed {folder_name}')
 
 # if __name__=="__main__":
 #     app.run(debug=True, host='0.0.0.0', port=8080)
