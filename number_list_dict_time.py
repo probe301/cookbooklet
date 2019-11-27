@@ -74,7 +74,7 @@ def transpose(data):
 
 
 
-def windows(iterable, length=2, overlap=0, yield_tail=False):
+def windows(iterable, length=2, overlap=0, yield_tail=True):
   '''按照固定窗口大小切片list, 可以重叠
   滑动array窗口,
   每次提供length数目的元素,如果有overlap则重复之前的元素

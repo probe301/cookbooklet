@@ -13,7 +13,18 @@ def generate_ascii_title(text):
 # generate_ascii_title('ascii title')
 
 
-
+def printcolor(msg, color=None):
+  '''在 jupyter notebook 中也有效'''
+  if color == "green":
+    print('\033[92m%s\033[0m' % msg)
+  elif color == "blue":
+    print('\033[94m%s\033[0m' % msg)
+  elif color == "yellow":
+    print('\033[93m%s\033[0m' % msg)
+  elif color == "red":
+    print('\033[91m%s\033[0m' % msg)
+  else:
+    print(msg)
 
 
 
@@ -281,13 +292,23 @@ def yaml_saves(data):
 
 
 
-
-
+import json
+def json_load(path):
+  with open(path, 'r', encoding='utf-8') as f:
+    data = json.load(f)
+  return data
+def json_save(data, path):
+  with open(path, 'w', encoding='utf-8') as f:
+    json.dump(data, f)
+def json_loads(s):
+  return json.loads(s)
+def json_saves(data):
+  return json.dumps(data)
 
 
 
 import os
-def load_text(path, encoding=None):
+def text_load(path, encoding=None):
   ''' 读取文本, 尝试不同的解码 '''
   if not os.path.exists(path):
     raise ValueError("path `{}` not exist".format(path))
@@ -300,16 +321,14 @@ def load_text(path, encoding=None):
   with open(path, 'r', encoding=encoding) as f:
     ret = f.read()
   return ret
-
-
-def save_text(path, data, encoding='utf-8'):
+def text_save(path, data, encoding='utf-8'):
   with open(path, 'w', encoding=encoding) as f:
     f.write(data)
   return True
 
 
 
-def load_csv(path, sample=10, only_title=False, include=(), exclude=()):
+def csv_load(path, sample=10, only_title=False, include=(), exclude=()):
   def _load_csv_value_convert(text):
     '''载入csv时处理每个字段的值, 转换整数等'''
     if text == 'nan':
@@ -353,7 +372,7 @@ def load_csv(path, sample=10, only_title=False, include=(), exclude=()):
   return result
 
 import csv
-def save_csv(headers, data, filename):
+def csv_save(headers, data, filename):
   # 将 obj 存储到 csv
   # headers = ['Symbol','Price','Date','Time','Change','Volume']
   # rows = [('AA', 39.48, '6/11/2007', '9:36am', -0.18, 181800),

@@ -197,8 +197,8 @@ def regexp_usage():
   # 属性：
   # string: 匹配时使用的文本。
   # re: 匹配时使用的Pattern对象。
-  # pos: 文本中正则表达式开始搜索的索引。值与Pattern.match()和Pattern.seach()方法的同名参数相同。
-  # endpos: 文本中正则表达式结束搜索的索引。值与Pattern.match()和Pattern.seach()方法的同名参数相同。
+  # pos: 文本中正则表达式开始搜索的索引。值与Pattern.match()和Pattern.search()方法的同名参数相同。
+  # endpos: 文本中正则表达式结束搜索的索引。值与Pattern.match()和Pattern.search()方法的同名参数相同。
   # lastindex: 最后一个被捕获的分组在文本中的索引。如果没有被捕获的分组，将为None。
   # lastgroup: 最后一个被捕获的分组的别名。如果这个分组没有别名或者没有被捕获的分组，将为None。
   # 方法：
