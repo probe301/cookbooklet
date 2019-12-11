@@ -62,4 +62,14 @@
 
 
 
+# Tree
 
+# └───refs
+# │   │       ├───heads
+# │   │       │       master
+# │   │       │
+# │   │       ├───remotes
+# │   │       │   └───origin
+# │   │       │           master
+# │   │       │
+# │   │       └───ta

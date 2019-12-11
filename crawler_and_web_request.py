@@ -112,9 +112,11 @@ for div in doc.find('#content-text > .tabbertab'):
   pqdiv = pq(div)
   pqdiv.text()  # pq obj method
 
-
-
-
+# extract from pq object
+author_id = doc.find('h3.mp-info__title>a').attr('href').split('/')[-1]
+# extract from lxml object
+# for div in doc.find(...)
+author_id = div.attrib['href'].split('/')[-1]
 
 
 

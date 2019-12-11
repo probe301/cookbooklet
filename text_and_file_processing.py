@@ -259,10 +259,10 @@ class IncludeOrderedLoader(yaml.Loader):
 
 
 def yaml_load(path, loader=IncludeOrderedLoader):
-  ''' 按照有序字典载入yaml 支持 !include
-  '''
-  return yaml.load(open(path, encoding='utf-8'), loader)
-
+  ''' 按照有序字典载入yaml 支持 !include'''
+  with open(path, encoding='utf-8') as f:
+    result = yaml.load(f, loader)
+  return result
 
 def yaml_save(data, path):
   '''支持中文, 可以识别 OrderedDict'''
