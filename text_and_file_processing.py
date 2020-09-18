@@ -13,22 +13,6 @@ def generate_ascii_title(text):
 # generate_ascii_title('ascii title')
 
 
-def printcolor(msg, color=None):
-  '''在 jupyter notebook 中也有效'''
-  if color == "green":
-    print('\033[92m%s\033[0m' % msg)
-  elif color == "blue":
-    print('\033[94m%s\033[0m' % msg)
-  elif color == "yellow":
-    print('\033[93m%s\033[0m' % msg)
-  elif color == "red":
-    print('\033[91m%s\033[0m' % msg)
-  else:
-    print(msg)
-
-
-
-
 
 
 
@@ -42,7 +26,7 @@ def printcolor(msg, color=None):
 文本和字符处理
 --------------"""
 
-def encode_len(t, encode=None): 
+def encode_len(t, encode=None):
   ''' encode='gbk' 计算长度时, 中文字符视为长度2, 这样统计字数方便对齐
       encode='utf-8' 计算长度时, 中文字符视为长度3
       encode=None 使用普通的 len(text) 计算长度'''
@@ -51,20 +35,22 @@ def encode_len(t, encode=None):
 
 
 def match_previous(lines, pattern, history=5):
-  '''返回匹配的行以及之前的n行'''
+  ''' 返回匹配的行以及之前的n行
+      usage
+      # with open(r'../../cookbook/somefile.txt') as f:
+      #   for line, prevlines in search(f, 'Python', 5):
+      #     for pline in prevlines:
+      #       print(pline, end='')
+      #     print(line, end='')
+      #     print('-' * 20)
+  '''
   from collections import deque
   previous_lines = deque(maxlen=history)
   for li in lines:
     if pattern in li:
       yield li, previous_lines
     previous_lines.append(li)
-  # '''usage'''
-  # with open(r'../../cookbook/somefile.txt') as f:
-  #   for line, prevlines in search(f, 'Python', 5):
-  #     for pline in prevlines:
-  #       print(pline, end='')
-  #     print(line, end='')
-  #     print('-' * 20)
+
 
 
 
@@ -165,7 +151,7 @@ def sections(iterable, is_title=lambda line: line.startswith('#')):
 def clean_xml(text):
   ''' 清理用于 xml 的有效字符
       曾遇到标题里有字符 backspace \x08, 在 CentOS 中无法生成 xml feed
-      用于文本内容, 
+      用于文本内容,
       一般不用于路径或 yaml csv 中 '''
   def valid_xml_char_ordinal(c):
     # conditions ordered by presumed frequency
@@ -181,7 +167,7 @@ DEFAULT_INVALID_CHARS = {':', '*', '?', '"', "'", '<', '>', '|', '\r', '\n', '\t
 EXTRA_CHAR_FOR_FILENAME = {'/', '\\'}
 
 def remove_invalid_char(dirty, invalid_chars=None, for_path=False, combine_whitespaces=True):
-  ''' 清理无效字符, 用于文件路径, 配置字段, 或 yaml csv 等 
+  ''' 清理无效字符, 用于文件路径, 配置字段, 或 yaml csv 等
       for_path = True   允许出现 `/` 和 `\\`
       for_path = False  只保留纯文件名, 不能出现 `/` 和 `\\`'''
   text = clean_xml(dirty)
@@ -425,9 +411,53 @@ def datamatrix(text, title=True, sep=','):
 
 
 
+class TranslationDict:
+  '''
+  在两组字符串之间相互转换
+  usage:
+    transdict = TranslationDict()
+    'IDE' | transdict                                                # 正向转换
+    >>> 'Integrated Development Environment：集成开发环境'
+    'Java Database Connectivity：Java 数据库连接' ^ transdict         # 反向转换
+    >>> 'JDBC'
+    'IDE' ^ transdict                                                # 失败的转换
+    >>> ValueError: cannot reversed translate user specified `IDE`
+  '''
+
+  data = '''
+    IDE          Integrated Development Environment：集成开发环境
+    JDBC         Java Database Connectivity：Java 数据库连接
+    JDK          Java SE Development Kit：Java 标准版开发工具包
+  '''
+  def __ror__(self, key):
+    if key in self.transdict:
+      return self.transdict[key]
+    else:
+      raise ValueError(f'cannot translate user specified `{key}`')
+
+  def __rxor__(self, key):
+    if key in self.reversed_transdict:
+      return self.reversed_transdict[key]
+    else:
+      raise ValueError(f'cannot reversed translate user specified `{key}`')
+
+  def __init__(self):
+    transdict = {}
+    for line in self.data.splitlines():
+      if line.strip():
+        key, *_, value = re.split(r'  +', line.strip())
+        transdict[key] = value
+    self.transdict = transdict
+    self.reversed_transdict = {v: k for k, v in transdict.items()}
 
 
 
+
+'''
+整形转换十六进制格式化
+'''
+def to_hex(i):
+  return f'{hex(i)[2:]:>02}'.upper()
 
 
 
@@ -451,8 +481,8 @@ def datamatrix(text, title=True, sep=','):
 --------------"""
 
 import fnmatch
-def all_files(root, patterns='*', 
-              blacklist=('.git', '__pycache__', '.ipynb_checkpoints'), 
+def all_files(root, patterns='*',
+              blacklist=('.git', '__pycache__', '.ipynb_checkpoints'),
               single_level=False, yield_folders=False):
   ''' 取得文件夹下所有文件
   single_level 仅处理 root 中的文件(文件夹) 不处理下层文件夹
@@ -474,8 +504,8 @@ def all_files(root, patterns='*',
       break
 
 import fnmatch
-def all_subdirs(root, patterns='*', 
-                blacklist=('.git', '__pycache__', '.ipynb_checkpoints'), 
+def all_subdirs(root, patterns='*',
+                blacklist=('.git', '__pycache__', '.ipynb_checkpoints'),
                 single_level=False):
   ''' 取得文件夹下所有文件夹 '''
 
@@ -491,11 +521,11 @@ def all_subdirs(root, patterns='*',
     if single_level:
       break
 
-# When `topdown` is true, the caller can modify the dirnames 
-# list in-place and walk will only recurse into the subdirectories 
+# When `topdown` is true, the caller can modify the dirnames
+# list in-place and walk will only recurse into the subdirectories
 # whose names remain in dirnames; can be used to prune the search...
-# `dirs[:] = value` modifies dirs in-place. It changes the contents 
-# of the list dirs without changing the container. 
+# `dirs[:] = value` modifies dirs in-place. It changes the contents
+# of the list dirs without changing the container.
 
 
 
@@ -524,5 +554,3 @@ def compare_text(t1, t2, prefix=''):
   for change in changes:
     print(prefix + change)
   return changes
-
-
