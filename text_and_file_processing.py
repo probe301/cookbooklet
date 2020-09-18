@@ -508,21 +508,73 @@ def from_relative_path(path):
 
 
 
-
+import difflib
+def sep_split(text, sep=r"([.。!！?？\n+])"):
+  '''分割字符串, 保留分隔符'''
+  result = re.split(sep, text)
+  values = result[::2]
+  delimiters = result[1::2] + ['']
+  return [v+d for v, d in zip(values, delimiters)]
 
 def show_diff(old_code, new_code):
-  from difflib import ndiff
-  diff = ndiff(old_code.splitlines(1), new_code.splitlines(1))
-  # splitlines(1) 保留行尾的换行
-  print(''.join(line for line in diff if not line.startswith(' ')))
+  diff = difflib.ndiff(sep_split(old_code), sep_split(new_code))
+  # diff = difflib.ndiff(old_code.splitlines(1), new_code.splitlines(1)) # splitlines(1) 保留行尾的换行
+  print('\n'.join(line for line in diff if not line.startswith(' ')))
 
-
-
-from difflib import unified_diff
 def compare_text(t1, t2, prefix=''):
-  changes = [l for l in unified_diff(t1.split('\n'), t2.split('\n'))]
+  changes = [l for l in difflib.unified_diff(t1.split('\n'), t2.split('\n'))]
   for change in changes:
     print(prefix + change)
   return changes
 
 
+# AES 加密解密
+
+# 样例:
+# 首先约定 key utf8 字符串
+# 以该指定 key 加密 (在 python 中)
+# 以该指定 key 解密 (在 javascript 中)
+
+# 均使用 AES MODE_OFB, 该模式加密时不要求定长序列, 但是 python API 仍然需要 pad?
+# AES key 应为定长向量, 以 md5 将字符串 key 转为向量
+# 密钥key长度须为16（AES-128）、24（AES-192）、或32（AES-256）Bytes 长度. AES-128足够用
+# 参数还有个 iv, 以 key 代替, 需检查缺陷
+
+from Crypto.Cipher import AES
+from binascii import b2a_hex, a2b_hex
+import hashlib
+
+class CryptorAES():
+  BS = 16
+  mode = AES.MODE_OFB
+  def __init__(self, password):
+    self.key = self.make_key(password)
+    # hash.hexdigest() 返回摘要，作为十六进制数据字符串值
+    # 取前16位 print(ord(c), end=',') for c in self.key
+  def encrypt(self, text):
+    ''' 加密函数，如果text不是16的倍数就补足为16的倍数 '''
+    # iv = Random.new().read(AES.block_size) # AES.block_size==16
+    cryptor = AES.new(self.key, self.mode, self.key)
+
+    data = str.encode(text)
+    if(len(data) % self.BS != 0): add = self.BS - (len(data) % self.BS)
+    else: add = 0
+    data = data + (b'\0' * add)
+    self.ciphertext = cryptor.encrypt(data)
+    # 加密得到的字符串不一定是ascii字符集的，输出到终端或者保存时候可能存在问题
+    # 所以转为16进制字符串
+    return bytes.hex(self.ciphertext)
+
+  def make_key(self, password):
+    ''' 字符串 key 转为定长向量 '''
+    return hashlib.md5(str.encode(password.strip())).hexdigest()[:self.BS]
+
+  def decrypt(self, text, password=None):
+    ''' 解密后，去掉补足的空格 
+    如果提供key, 以该指定密码解密, 用于测试错误密码的情况'''
+    if password: key = self.make_key(password)
+    else: key = self.key
+    cryptor = AES.new(key, self.mode, key)
+    plain = cryptor.decrypt(a2b_hex(text))
+    return bytes.decode(plain.strip(b'\0'), errors="ignore")
+  

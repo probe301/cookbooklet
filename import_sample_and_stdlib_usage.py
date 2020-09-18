@@ -227,6 +227,40 @@ def regexp_usage():
   # \id与\g<id>是等价的；但\10将被认为是第10个分组，
   # 如果你想表达\1之后是字符'0'，只能使用\g<1>0。
 
+  # 引用分组编号匹配：
+  # >>> pat=re.compile(r'(?P<K>a)\w(c)(?P=K)\2')  #\2引用分组2的值，就是c
+  # >>> pat.findall('Aabcadef')                   #匹配不到，因为完整'a\wcac',模式的第5位是c
+  # []
+  # >>> pat.findall('Aabcacdef')                  #匹配到，模式的第5位和组2一样,值是c
+  # [('a', 'c')]
+  # >>> pat.search('Aabcacdef').groups()
+  # ('a', 'c')
+  # >>> pat.search('Aabcacdef').group()
+  # 'abcac'
+  # >>> pat.search('Aabcacdef').group(1)
+  # 'a'
+  # >>> pat.search('Aabcacdef').group(2)
+  # 'c'
+
+  # (?P=name)：引用别名为的分组匹配到的串
+  # >>> pat=re.compile(r'(?P<K>a)\w(c)(?P=K)')    #(?P=K)引用分组1的值，就是a
+  # >>> pat.search('abcdef').group()              #匹配不到，因为完整'a\wca',模式的第4位是a
+  # AttributeError: 'NoneType' object has no attribute 'group'
+  # >>> pat.search('abcadef').group()             #匹配到，模式的第4位和组1一样,值是c
+  # 'abca'
+  # >>> pat.search('abcadef').groups()
+  # ('a', 'c')
+  # >>> pat.search('abcadef').group(1)
+  # 'a'
+  # >>> pat.search('abcadef').group(2)
+  # 'c
+
+
+  text = '''提取<span color='red'>自定义的</span>颜色 可能出现在缩进块里, 可能有<font style='background:#def; font-size:1.5rem; color: #edb;'>不同的颜色定义</font>型式 '''
+  pat2 = r'(<(span|font)[^>]+?color ?= ?([\'\"]?).+?\3[^>]+?>.+?</ ?\2>)'
+  # findall 一般把整个表达式括起来, 所以里面的分组注意从 \2 开始
+  result = re.findall(pat2, text)
+  print(result)
 
   m = re.match(r'(\w+) (\w+)(?P<sign>.*)', 'hello world!')
   print("m.string:", m.string)            # m.string: hello world!
