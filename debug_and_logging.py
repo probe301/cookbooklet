@@ -1,5 +1,25 @@
 
 
+import pprint
+pp = pprint.PrettyPrinter(width=160, compact=True).pprint
+# pp(complex_object)
+
+
+import reprlib
+'''演示 repr 的用法'''
+reprlib.repr(None)
+
+'''演示递归 repr 的用法'''
+class MyList(list):
+  @reprlib.recursive_repr()
+  def __repr__(self):
+    return '<' + '|'.join(map(repr, self)) + '>'
+
+# m = MyList('abc')
+# m.append(m)
+# m.append('x')
+# print(m)
+
 """--------------
 调试和测试
 --------------"""
@@ -284,7 +304,18 @@ def trace_line(f):
   return _f
 
 
-
+def printcolor(msg, color=None):
+  '''在 jupyter notebook 中也有效'''
+  if color == "green":
+    print('\033[92m%s\033[0m' % msg)
+  elif color == "blue":
+    print('\033[94m%s\033[0m' % msg)
+  elif color == "yellow":
+    print('\033[93m%s\033[0m' % msg)
+  elif color == "red":
+    print('\033[91m%s\033[0m' % msg)
+  else:
+    print(msg)
 
 
 
@@ -359,5 +390,3 @@ def pyshould_test_sample():
         self.assertTrue(element in self.seq)
 
   unittest.main()
-
-
