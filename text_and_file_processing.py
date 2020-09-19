@@ -537,7 +537,7 @@ def from_relative_path(path):
 
 
 
-
+import re
 import difflib
 def sep_split(text, sep=r"([.。!！?？\n+])"):
   '''分割字符串, 保留分隔符'''
@@ -551,11 +551,25 @@ def show_diff(old_code, new_code):
   # diff = difflib.ndiff(old_code.splitlines(1), new_code.splitlines(1)) # splitlines(1) 保留行尾的换行
   print('\n'.join(line for line in diff if not line.startswith(' ')))
 
-def compare_text(t1, t2, prefix=''):
-  changes = [l for l in difflib.unified_diff(t1.split('\n'), t2.split('\n'))]
-  for change in changes:
-    print(prefix + change)
-  return changes
+def compare_text(t1, t2, prefix='', verbose=False):
+  t1 = t1.strip().split('\n')
+  t2 = t2.strip().split('\n')
+  if verbose:
+    changes = [l for l in difflib.unified_diff(t1, t2, n=3)]
+    return changes
+  else:
+    changes = [l for l in difflib.unified_diff(t1, t2, n=0)]
+    # print(repr(changes))
+    return [c for c in changes if c.strip() and not(c.startswith('@@') or c=='+++ \n' or c=='--- \n')]
+
+def sequence_matcher(a, b):
+  s = difflib.SequenceMatcher(None, a, b)
+  for tag, i1, i2, j1, j2 in s.get_opcodes():
+    if tag=='equal':
+      continue
+    print(f'{tag:7}   a[{i1}:{i2}] --> b[{j1}:{j2}] {a[i1:i2]!r:>8} --> {b[j1:j2]!r}')
+
+
 
 
 # AES 加密解密
@@ -600,11 +614,10 @@ class CryptorAES():
     return hashlib.md5(str.encode(password.strip())).hexdigest()[:self.BS]
 
   def decrypt(self, text, password=None):
-    ''' 解密后，去掉补足的空格 
+    ''' 解密后，去掉补足的空格
     如果提供key, 以该指定密码解密, 用于测试错误密码的情况'''
     if password: key = self.make_key(password)
     else: key = self.key
     cryptor = AES.new(key, self.mode, key)
     plain = cryptor.decrypt(a2b_hex(text))
     return bytes.decode(plain.strip(b'\0'), errors="ignore")
-  
