@@ -20,6 +20,18 @@ class MyList(list):
 # m.append('x')
 # print(m)
 
+'''演示typing Union用法'''
+from typing import Union
+def (a: Union[str, int]):
+  if isinstancec(a, str):
+    print(a*2)
+  elif isinstancec(a, int):
+    print(a+1)
+
+def post_xml(data: Union[str, ET.Element]):
+  pass
+
+
 """--------------
 调试和测试
 --------------"""

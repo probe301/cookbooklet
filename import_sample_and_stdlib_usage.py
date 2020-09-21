@@ -365,16 +365,16 @@ def regexp_usage():
 def path_usage():
 
   import pathlib
-  p = pathlib.Path('.')  
+  p = pathlib.Path('.')
   [x for x in p.iterdir() if x.is_dir()]     # 列出所有子目录
   # [WindowsPath('.git'), WindowsPath('.idea'), WindowsPath('.vscode'), ...]
   list(p.glob('**/*.py'))   # 列出指定类型的文件
   # [PosixPath('pathlib.py'), PosixPath('setup.py'), PosixPath('test_pathlib.py')]
 
-  p = pathlib.Path(r'F:\cookies\python')  
+  p = pathlib.Path(r'F:\cookies\python')
   q = p / 'learnPython'  # 使用 / 拼接路径
   print(q)
-  # F: \cookies\python\learnPython  
+  # F: \cookies\python\learnPython
 
   q.exists()  # 查询属性
   # True
@@ -598,6 +598,8 @@ def string_usage():
 
   ''' str format
   '''
+  'a={} b={{}}'.format('text')   # 不转义花括号{}的写法
+  # 'a=text b={}'
 
   'Coordinates: {latitude}, {longitude}'.format(latitude='37.24N', longitude='-115.81W')
   # 'Coordinates: 37.24N, -115.81W'
@@ -678,7 +680,7 @@ def sys_and_platform_usage():
   # sys.exit([arg])                   # 退出，arg=0为正常退出
   sys.getdefaultencoding()            # 'utf-8' 获取系统当前编码
   sys.setdefaultencoding()            # 设置系统默认编码，执行reload(sys), setdefaultencoding('utf8')，将系统默认编码设置为utf8
-  sys.getfilesystemencoding()         # 获取文件系统使用编码方式，Windows下返回 'mbcs'，mac下返回'utf-8'. 
+  sys.getfilesystemencoding()         # 获取文件系统使用编码方式，Windows下返回 'mbcs'，mac下返回'utf-8'.
   sys.path                            # 获取指定模块搜索路径的字符串集合
   sys.platform                        # 'win32' 获取当前系统平台
   sys.stdin, sys.stdout, sys.stderr   # 与标准I/O流对应的流对象
@@ -686,9 +688,5 @@ def sys_and_platform_usage():
   platform.system()    # 获取操作系统类型，'Windows' 'Linux'
   platform.platform()  # 获取操作系统，'Windows-10-10.0.18362-SP0' 'Darwin-9.8.0-i386-32bit'
   platform.version()   # 获取系统版本信息 '10.0.18362'
-  platform.mac_ver() 
+  platform.mac_ver()
   platform.win32_ver() # ('10', '10.0.18362', 'SP0', 'Multiprocessor Free')
-
-
-
-  

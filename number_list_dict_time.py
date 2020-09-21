@@ -367,3 +367,43 @@ def systematic_sample(data, n):
   for i in range(n):
     sample.append(data[int((len_data-1) * i / (n-1))])
   return sample
+
+
+
+'''groupby demo
+将文本中带有内容的行设为一组, 将空行丢弃
+'''
+from itertools import groupby
+
+data = '''
+
+SD size (or range) must be large enough
+
+    11:54:52.168                                                                                                        *
+    11:54:52.677 SD size for cache misses not large enough.
+    11:54:52.677
+    java.lang.RuntimeException: SD size for cache misses not large enough.
+        at Vdb.common.failure(common.java:350)
+
+jro run, without journal path
+
+    12:03:07.724 input argument scanned: '-fspec'
+    12:03:07.725 input argument scanned: '-jro'
+    java.lang.RuntimeException: Slave localhost-0 prematurely terminated.
+        at Vdb.common.failure(common.java:350)
+        at Vdb.SlaveStarter.startSlave(SlaveStarter.java:188)
+        at Vdb.SlaveStarter.run(SlaveStarter.java:47)
+
+jn run Not a directory
+
+    12:04:21.768 localhost-0 : 	at Vdb.DV_map.allocateSDMaps(DV_map.java:861)
+    12:04:23.107 Look at file localhost-0.stdout.html for more information.
+    java.lang.RuntimeException: Slave localhost-0 prematurely terminated.
+        at Vdb.common.failure(common.java:350)
+        at Vdb.SlaveStarter.startSlave(SlaveStarter.java:188)
+        at Vdb.SlaveStarter.run(SlaveStarter.java:47)
+
+'''
+datalines = []
+for key, group in groupby(data.splitlines(), key=lambda l: l.startswith('    ') or not(l.strip())):
+    datalines.append('\n'.join(group))

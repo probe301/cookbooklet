@@ -4,6 +4,18 @@ def is_windows():
   import sys
   return sys.platform == 'win32'
 
+'''paramiko demo'''
+import paramiko
+ssh = paramiko.SSHClient()
+# 允许连接不在know_hosts文件中的主机，否则可能报错：paramiko.ssh_exception.SSHException:
+ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+# 连接服务器
+ssh.connect(hostname=host_ip, username='root')
+stdin, stdout, stderr = ssh.exec_command(cmd)
+stdout = cmd_output.read().decode()
+ssh.close()
+
+
 
 import subprocess
 def run_command(cmd, verbose=False):
@@ -72,3 +84,86 @@ def execute_windows_commands():
 # print val #输出为512
 # val = os.system('ls -al | grep non_exist_val')
 # print val #输出为256
+
+
+
+'''线程执行的基本模式'''
+import threading
+import time
+def jn_exec(name, n=10):
+  for i in range(n):
+    time.sleep(1)
+    print(f'jn_exec: {i+1}/{n} seconds')
+
+def jro_exec(name, n=12):
+  for i in range(n):
+    time.sleep(1)
+    print(f'jro_exec: {i+1}/{n} seconds')
+
+def vd_init(wait_time=5, n=3):
+  time.sleep(wait_time)
+  for i in range(n):
+    time.sleep(1)
+    print(f'    vd_init: {i+1}/{n} seconds')
+
+def vd_delete(n=5):
+  for i in range(n):
+    time.sleep(1)
+    print(f'    vd_delete: {i+1}/{n} seconds')
+
+def jn_and_jro_and_delete():
+
+  jn_exec('name', )
+  print('>>> jn completed, running jro')
+  jro_exec('name', )
+  print('>>> jro completed, running delete')
+  vd_delete()
+  print('>>> all done')
+
+t1 = threading.Thread(target=jn_and_jro_and_delete, args=())
+t2 = threading.Thread(target=vd_init, args=(5, ))
+t1.start()
+t2.start()
+t1.join()
+t2.join()
+
+# jn_exec: 1/10 seconds
+# jn_exec: 2/10 seconds
+# jn_exec: 3/10 seconds
+# jn_exec: 4/10 seconds
+# jn_exec: 5/10 seconds
+#     vd_init: 1/3 seconds
+# jn_exec: 6/10 seconds
+#     vd_init: 2/3 seconds
+# jn_exec: 7/10 seconds
+#     vd_init: 3/3 seconds
+# jn_exec: 8/10 seconds
+# jn_exec: 9/10 seconds
+# jn_exec: 10/10 seconds
+# >>> jn completed, running jro
+# jro_exec: 1/12 seconds
+# jro_exec: 2/12 seconds
+# jro_exec: 3/12 seconds
+# jro_exec: 4/12 seconds
+# jro_exec: 5/12 seconds
+# jro_exec: 6/12 seconds
+# jro_exec: 7/12 seconds
+# jro_exec: 8/12 seconds
+# jro_exec: 9/12 seconds
+# jro_exec: 10/12 seconds
+# jro_exec: 11/12 seconds
+# jro_exec: 12/12 seconds
+# >>> jro completed, running delete
+#     vd_delete: 1/5 seconds
+#     vd_delete: 2/5 seconds
+#     vd_delete: 3/5 seconds
+#     vd_delete: 4/5 seconds
+#     vd_delete: 5/5 seconds
+# >>> all done
+
+# join的原理就是依次检验线程池中的线程是否结束，没有结束就阻塞直到线程结束，如果结束则跳转执行下一个线程的join函数
+
+# 1. 阻塞主进程，专注于执行多线程中的程序
+# 2. 多线程多join的情况下，依次执行各线程的join方法，前头一个结束了才能执行后面一个
+# 3. 无参数，则等待到该线程结束，才开始执行下一个线程的join
+# 4. 参数timeout为线程的阻塞时间，如 timeout=2 就是罩着这个线程2s 以后，就不管他了，继续执行下面的代码

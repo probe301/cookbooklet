@@ -484,7 +484,11 @@ def to_hex(i):
 
 
 import boltons.strutils
-boltons.strutils.under2camel('complex_tokenizer'), boltons.strutils.camel2under('BasicParseTest')
+boltons.strutils.under2camel('complex_tokenizer')
+boltons.strutils.camel2under('BasicParseTest')
+
+'''字符串反向format方法 parse'''
+import parse
 
 
 
