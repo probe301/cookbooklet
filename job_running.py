@@ -63,3 +63,12 @@ def execute_windows_commands():
     # Python subprocess模块总结
     # http://hackerxu.com/2014/10/09/subprocess.html
 
+
+# Linux以Python执行命令的返回值
+# import os
+# val = os.system('ls -al')
+# print val #输出为0
+# val = os.system('ls -al non_exist_folder')
+# print val #输出为512
+# val = os.system('ls -al | grep non_exist_val')
+# print val #输出为256

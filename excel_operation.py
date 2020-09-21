@@ -31,7 +31,7 @@ def find_first_header_cell(cell):
       else:
         cell = sheet.Cells(cell.Row-1, cell.Column)
 
-"""在指定cell附近, 导航到偏移值所指的另一个cell
+"""在指定cell附近, 以row=+1, col=-1的相对定位, 导航到偏移值所指的另一个cell
 """
 def cell_neighbor(cell, row=0, col=0):
   return sheet.Cells(cell.Row+row, cell.Column+col)
@@ -125,3 +125,29 @@ class Record():
 
   def __str__(self):
     return '; '.join(f'{t}={self.brief_value(v)}' for t, v in zip(TITLES, self.record))
+
+
+
+
+import re
+import difflib
+class cell_replacer():
+  '''
+  预览和调整替换cell的文字内容
+  '''
+  def __init__(self, pat, repl, preview=False):
+    self.pat = pat
+    self.repl = repl
+    self.preview = preview
+  def __ror__(self, cell):
+    if cell and cell.Value:
+      new_value = re.sub(self.pat, self.repl, cell.Value)
+      if self.preview:
+          diff = difflib.ndiff(cell.Value, new_value)
+          print('\n'.join(line for line in diff if not line.startswith(' ')))
+      else:
+        cell.Value = new_value
+    else:
+      raise ValueError(f'Invalid cell {cell}')
+  def __str__(self):
+    return f'<cell_replacer object> pat={self.pat} repl={self.repl}'

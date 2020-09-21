@@ -411,6 +411,27 @@ def datamatrix(text, title=True, sep=','):
 
 
 
+import re
+class replacer():
+  '''
+  usage:
+    'line1' | replacer(r'1', '2')
+    >>> 'line2'
+    'line123 and 789' | replacer(r'line(\d+) and', lambda mat: f'line{int(mat.group(1))+333} and')
+    >>> 'line456 and 789'
+    'apple and pineapple' | replacer(r'(\w+).+(\1)', r'\1 and \1')
+    >>> 'apple and apple'
+  '''
+  def __init__(self, pat, repl):
+    self.pat = pat
+    self.repl = repl
+  def __ror__(self, value):
+    # print('call ', value)
+    return re.sub(self.pat, self.repl, value)
+  def __str__(self):
+    return f'<replacer object> pat={self.pat} repl={self.repl}'
+
+
 class TranslationDict:
   '''
   在两组字符串之间相互转换
@@ -462,10 +483,39 @@ def to_hex(i):
 
 
 
+import boltons.strutils
+boltons.strutils.under2camel('complex_tokenizer'), boltons.strutils.camel2under('BasicParseTest')
 
 
 
 
+"""
+对乱码的处理
+"""
+
+# https://www.yinxiang.com/everhub/note/f0d76cf9-7fd9-4a01-ae76-ae14ba424efa
+
+# a = """
+#   "{\"query_kw\": \"\345\260\217\347\272\242\344\271\246\",\"target_kw\":
+# \"\345\260\217\347\272\242\344\271\246\",\"target_pos\": \"TITLE\",\"target_context\":
+# \"\344\270\200\350\276\271\346\230\257\346\267\230\345\256\235\345\244\251\347\214\253,\344\270\200\350\276\271\346\230\257\344\272\254\344\270\234\350\213\217\345\256\201,\345\244\271\345\234\250\344\270\255\351\227\264\346\234\254\345\272\224\350\257\245\350\213\246\350\213\246\346\214\243\346\211\216\347\232\204\345\260\217\347\272\242\344\271\246,\345\217\215\345\200\222\351\242\221\351\242\221\344\273\216\345\267\250\345\244\264\346\211\213\351\207\214\351\242\206\346\235\245\345\267\250\350\265\204\343\200\202\350\203\275\345\244\237\346\210\220\344\270\272\343\200\212\345\210\233\351\200\240101\343\200\213\350\265\236\345\212\251\345\225\206\347\232\204\345\271\263\345\217\260,\350\202\257\345\256\232\344\270\215\346\230\257\346\263\233\346\263\233\344\271\213\350\276\210\343\200\202
+# \346\234\211\345\271\270\344\273\216\346\234\213\345\217\213...\",\"crawl_source\":
+# \"baidu_news\",\"crawl_cvid\": 1234567, \"crawl_index\": 224}"
+# print(a.encode("latin1").decode('utf-8'))
+# b.decode('gbk')
+
+# a = """
+# [type: STRINGstring_value: "{\"query_kw\": \"\\u5c0f\\u7ea2\\u4e66\", \"target_kw\":
+# \"\\u5c0f\\u7ea2\\u4e66\", \"target_pos\": \"TITLE\", \"target_context\":
+# \"\\u4e00\\u8fb9\\u662f\\u6dd8\\u5b9d\\u5929\\u732b,\\u4e00\\u8fb9\\u662f\\u4eac\\u4e1c\\u82cf\\u5b81,\\u5939\\u5728\\u4e2d\\u95f4\\u672c\\u5e94\\u8be5\\u82e6\\u82e6\\u6323\\u624e\\u7684\\u5c0f\\u7ea2\\u4e66,\\u53cd\\u5012\\u9891\\u9891\\u4ece\\u5de8\\u5934\\u624b\\u91cc\\u9886\\u6765\\u5de8\\u8d44\\u3002\\u80fd\\u591f\\u6210\\u4e3a\\u300a\\u521b\\u9020101\\u300b\\u8d5e\\u52a9\\u5546\\u7684\\u5e73\\u53f0,\\u80af\\u5b9a\\u4e0d\\u662f\\u6cdb\\u6cdb\\u4e4b\\u8f88\\u3002
+# \\u6709\\u5e78\\u4ece\\u670b\\u53cb...\", \"crawl_source\": \"baidu_news\", \"crawl_cvid\":
+# 1234567, \"crawl_index\": 224}"]
+# # 有可能需要把两个斜杠替换成一个斜杠
+# a = a.replace("\\\\","\\")
+# print(a.encode("latin1").decode("unicode-escape"))
+
+# 侦测当前字符串的编码判断当前字符串的格式（编码类型）
+# fencoding = chardet.detect(a)
 
 
 
