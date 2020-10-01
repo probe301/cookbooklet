@@ -32,7 +32,9 @@ def encode_len(t, encode=None):
       encode=None 使用普通的 len(text) 计算长度'''
   return len(t.encode(encode) if encode else t)
 
-
+def text_render_len(t):
+  ''' encode='gbk' 计算长度时, 将中文字符视为长度2, 这个统计字数用于以等宽字体显示中文字符时, 方便计算怎么对齐 '''
+  return len(t.encode('gbk'))
 
 def match_previous(lines, pattern, history=5):
   ''' 返回匹配的行以及之前的n行
@@ -422,7 +424,7 @@ class replacer():
     'apple and pineapple' | replacer(r'(\w+).+(\1)', r'\1 and \1')
     >>> 'apple and apple'
   '''
-  def __init__(self, pat, repl):
+  def __init__(self, pat, repl=''):
     self.pat = pat
     self.repl = repl
   def __ror__(self, value):

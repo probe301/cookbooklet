@@ -53,11 +53,11 @@ def cell_replace(cell, new_value, preview=True):
     cell.Value = new_value
 
 def cell_set_color(cell, level):
-  # 19浅黄, 20浅蓝 40浅棕黄 36高亮度黄
+  # WPS 19浅黄, 20浅蓝 40浅棕黄 36高亮度黄
   cell.Interior.ColorIndex = 19
   cell.Interior.ColorIndex = 20
   cell.Interior.ColorIndex = 21
-
+  # cell.Interior.Color 可以拿到 float 型的 truecolor, 而 ColorIndex 只是索引, 会失真
 
 
 """读取 selection, 取得每一行 row index, 取 Ai~Xi 的值

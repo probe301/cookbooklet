@@ -33,6 +33,15 @@ from pathlib import Path
 
 
 
+# python 常用的没在 anaconda 里的扩展
+
+# arrow
+# html2text
+# peewee
+# paramiko
+
+
+
 
 def partial_sample():
   import functools
