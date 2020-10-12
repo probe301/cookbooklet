@@ -42,9 +42,9 @@ def cell_neighbor(cell, row=0, col=0):
 #   t3 = sheet.Cells(cell.Row, cell.Column-2).Value.split()[0]
 #   t4 = sheet.Cells(cell.Row, cell.Column-1).Value.split()[1]
 
-"""替换cell内容, 事先可以预览, 然后才真的替换
-"""
 def cell_replace(cell, new_value, preview=True):
+  """ 替换cell内容, 事先可以预览, 然后才真的替换
+  """
   if preview:
     print(show_diff(cell.Value, new_value))
     # print(cell.Value)
@@ -52,12 +52,27 @@ def cell_replace(cell, new_value, preview=True):
   else:
     cell.Value = new_value
 
-def cell_set_color(cell, level):
-  # WPS 19浅黄, 20浅蓝 40浅棕黄 36高亮度黄
-  cell.Interior.ColorIndex = 19
-  cell.Interior.ColorIndex = 20
-  cell.Interior.ColorIndex = 21
-  # cell.Interior.Color 可以拿到 float 型的 truecolor, 而 ColorIndex 只是索引, 会失真
+# def cell_set_color(cell, level):
+#   # WPS 19浅黄, 20浅蓝 40浅棕黄 36高亮度黄
+#   cell.Interior.ColorIndex = 19
+#   cell.Interior.ColorIndex = 20
+#   cell.Interior.ColorIndex = 21
+#   # cell.Interior.Color 可以拿到 float 型的 truecolor, 而 ColorIndex 只是索引, 会失真
+
+def cell_set_color(cell, color):
+  ''' cell.Interior.Color 可以拿到 float 型的 truecolor, 而 ColorIndex 只是索引, 会失真
+      WPS的cell背景色, 可以自己涂色后, 打印这些单元格得出
+        for cell in app.Selection:
+          print(f"'{cell.Value}': {cell.Interior.Color}") '''
+  data = {
+      '浅浅红': 14083324.0, '浅浅黄': 13431551.0, '浅浅蓝': 15917529.0, '浅浅绿': 14348258.0, '浅浅灰': 15592941.0, '浅浅青': 16247773.0, '浅浅灰蓝': 14998742.0,
+      '浅红': 11389944.0, '浅黄': 10086143.0, '浅蓝': 15189684.0, '浅绿': 11854022.0, '浅灰': 14408667.0, '浅青': 15652797.0, '浅灰蓝': 13285804.0,
+      '红': 8696052.0, '黄': 6740479.0, '蓝': 14395790.0, '绿': 9359529.0, '灰': 13224393.0, '青': 15123099.0, '灰蓝': 11573124.0,
+  }
+  if color in data:
+    cell.Interior.Color = data[color]
+  else:
+    raise ValueError(f'Invalid color {color}')
 
 
 """读取 selection, 取得每一行 row index, 取 Ai~Xi 的值
