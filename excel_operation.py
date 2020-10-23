@@ -166,3 +166,7 @@ class cell_replacer():
       raise ValueError(f'Invalid cell {cell}')
   def __str__(self):
     return f'<cell_replacer object> pat={self.pat} repl={self.repl}'
+
+
+删除整行
+cell.EntireRow.Delete()
