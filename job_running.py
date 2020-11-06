@@ -35,6 +35,49 @@ def run_command(cmd, verbose=False):
 
 
 
+# 简便的多远程节点的运行命令方式, 适合在 jupyter 里做控制板
+import paramiko
+import time
+class RemoteNode:
+    def __init__(self, ip, port, user, pw, label=''):
+        self.ip = ip
+        self.port = port
+        self.user = user
+        self.pw = pw
+        self.label = label or f'{self.ip}:{self.port}'
+
+    def connect(self, verbose=False):
+        remote_node = paramiko.SSHClient()
+        remote_node.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        remote_node.connect(self.ip, self.port, self.user, self.pw)
+        if verbose:
+            print(f'connect RemoteNode {self.ip}:{self.port} done')
+        return remote_node
+
+    def test(self):
+        self.connect(verbose=True)
+
+    def __gt__(self, cmd):
+        start_time = time.time()
+        fail = 0
+        print(f'>>> {cmd} (on {self.label})')
+        remote_node = self.connect()  # reconnect everytime
+        stdin, stdout, stderr = remote_node.exec_command(cmd)
+        for line in iter(stdout.readline, ''):  # 实时显示出 stdout, 不使用 iter 会导致执行完了一并显示
+            print('    ' + line.rstrip('\n'))
+        for line in iter(stderr.readline, ''):
+            print('  x ' + line.rstrip('\n'))
+            fail = 1
+        print(f'<<< {"fail" if fail else "done"} in {(time.time() - start_time):.2f}s\n')
+        remote_node.close()
+
+# usage
+# vmA = RemoteNode('ip', 22, 'root', 'password', label='vmA')
+# vmB = RemoteNode('ip', 22, 'root', 'password', label='vmB')
+# vmA > 'ls'
+# vmB > 'ls -alh'
+
+
 def cronjob():
     '''守护进程'''
     from apscheduler.schedulers.blocking import BlockingScheduler
