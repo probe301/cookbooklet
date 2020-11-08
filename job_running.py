@@ -38,6 +38,7 @@ def run_command(cmd, verbose=False):
 # 简便的多远程节点的运行命令方式, 适合在 jupyter 里做控制板
 import paramiko
 import time
+from itertools import zip_longest
 class RemoteNode:
     def __init__(self, ip, port, user, pw, label=''):
         self.ip = ip
@@ -59,7 +60,7 @@ class RemoteNode:
 
     def __gt__(self, cmd):
         start_time = time.time()
-        fail = 0
+        ret_status = 'done'
         print(f'>>> {cmd} (on {self.label})')
         remote_node = self.connect()  # reconnect everytime
         stdin, stdout, stderr = remote_node.exec_command(cmd)
@@ -68,7 +69,7 @@ class RemoteNode:
         for line in iter(stderr.readline, ''):
             print('  x ' + line.rstrip('\n'))
             fail = 1
-        print(f'<<< {"fail" if fail else "done"} in {(time.time() - start_time):.2f}s\n')
+        print(f'<<< {ret_status} in {(time.time() - start_time):.2f}s\n')
         remote_node.close()
 
 # usage
@@ -77,6 +78,17 @@ class RemoteNode:
 # vmA > 'ls'
 # vmB > 'ls -alh'
 
+# 实时标准输出和标准错误的样例
+# cmd = '''
+# echo "1in stdout";      sleep 4; 
+# echo "2in stdout";      sleep 4; 
+# echo "3in stderr" 1>&2; sleep 2; 
+# echo "4in stdout";      sleep 4; 
+# echo "5in stderr" 1>&2; sleep 2; 
+# echo "6in stdout";      sleep 4; 
+# echo "7in stdout"
+# '''
+# vmA > cmd.replace('\n', ' ')  # 因为缓冲区, 不太能保证顺序, 但差不太多
 
 def cronjob():
     '''守护进程'''
