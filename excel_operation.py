@@ -8,7 +8,7 @@ xlapp = win32com.client.Dispatch("Excel.Application") # Office Excel
 xlapp.Visible = True
 doc_path = 'C:/Work/demo.xlsx'
 doc = xlapp.Workbooks.Open(doc_path)
-
+doc.ActiveSheet  # 当前激活页
 # 访问 sheet
 doc.WorkSheets.Item(1).Name, doc.WorkSheets.Item(2).Name
 sheet = doc.WorkSheets.Item("IO")

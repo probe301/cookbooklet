@@ -413,6 +413,46 @@ def datamatrix(text, title=True, sep=','):
 
 
 
+def text_render_len(t):
+    ''' encode='gbk' 计算长度时, 将中文字符视为长度2, 这个统计字数用于以等宽字体显示中文字符时, 方便计算怎么对齐 '''
+    return len(t.encode('gbk'))
+
+def indent_and_wrap(text):
+    """
+    在特定的位置折行, 一般用于规避120字符限制
+    """
+    if text is None:
+        return '    <none>'
+    lines = text.splitlines()
+    result_lines = []
+    for line in lines:
+        if text_render_len(line) >= 118:
+            if ', ' in line:
+                clips = line.split(', ')
+                clip_line = ''  # 重新编辑添加到 clip_line
+                for clip in clips:
+                    if text_render_len(clip_line + clip + ', ') < 118:
+                        clip_line += clip + ', '
+                    else:  # 不能追加了, 要换行
+                        result_lines.append(clip_line.rstrip())
+                        clip_line = '    ' + clip + ', '
+                else:  # 全都添加完了, 得删除末尾
+                    clip_line = clip_line.rstrip().rstrip(',')
+                    if clip_line:
+                        result_lines.append(clip_line)
+                    result_lines[-1] = result_lines[-1].rstrip().rstrip(',')
+            else:
+                # raise ValueError(f'需要换行, 但是发现没有合适的换行位置 {line}')
+                print(f'需要换行, 但是发现没有合适的换行位置 {line}')
+                return '\n'.join(('    ' + line).rstrip() for line in lines)
+        else:
+            result_lines.append(line)
+    return '\n'.join(('    ' + line).rstrip() for line in result_lines)
+
+
+
+
+
 import re
 class replacer():
   '''

@@ -80,15 +80,17 @@ class RemoteNode:
 
 # 实时标准输出和标准错误的样例
 # cmd = '''
-# echo "1in stdout";      sleep 4; 
-# echo "2in stdout";      sleep 4; 
-# echo "3in stderr" 1>&2; sleep 2; 
-# echo "4in stdout";      sleep 4; 
-# echo "5in stderr" 1>&2; sleep 2; 
-# echo "6in stdout";      sleep 4; 
+# echo "1in stdout";      sleep 4;
+# echo "2in stdout";      sleep 4;
+# echo "3in stderr" 1>&2; sleep 2;
+# echo "4in stdout";      sleep 4;
+# echo "5in stderr" 1>&2; sleep 2;
+# echo "6in stdout";      sleep 4;
 # echo "7in stdout"
 # '''
 # vmA > cmd.replace('\n', ' ')  # 因为缓冲区, 不太能保证顺序, 但差不太多
+
+# TODO vmB >> 表示仅执行, 无输出, 或者丢到后台执行?
 
 def cronjob():
     '''守护进程'''
