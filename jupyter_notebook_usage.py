@@ -355,3 +355,45 @@ display(Image('model.png', width=500))
 from IPython.display import SVG
 from keras.utils.visualize_util import model_to_dot
 SVG(model_to_dot(model, show_shapes=True).create(prog='dot', format='svg'))
+
+
+
+
+
+
+
+# 注册为 jupyter line magic
+# 以 %cmd 运行
+import subprocess
+import os
+from IPython.core.magic import register_line_magic, register_cell_magic
+import paramiko
+ssh = paramiko.SSHClient()
+ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+ssh.connect("127.0.0.1", 6022, "root", "vm")
+
+def run_ssh_command(cmd):
+  try:
+    stdin, stdout, stderr = ssh.exec_command(cmd, timeout=300)
+    # stdin.write("Y") #interact with server, typing Y
+    print(stdout.read().decode('utf-8'))
+    print(stderr.read().decode('utf-8'))
+  except:
+    print('ssh_execute_command failed')
+
+def run_local_command(cmd):
+  print('> running: ', cmd)
+  try:
+    output = subprocess.check_output(
+        cmd, stderr=subprocess.STDOUT, shell=True, timeout=3,
+        universal_newlines=True)
+  except subprocess.CalledProcessError as exc:
+    print("status: FAIL", exc.returncode, exc.output)
+    return exc.returncode
+  else:
+    print("output: \n{}\n".format(output))
+
+@register_line_magic
+def cmd(line):
+    if line.strip() == '': return
+    run_ssh_command(line)
