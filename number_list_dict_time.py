@@ -438,6 +438,46 @@ jn run Not a directory
         at Vdb.SlaveStarter.run(SlaveStarter.java:47)
 
 '''
-datalines = []
-for key, group in groupby(data.splitlines(), key=lambda l: l.startswith('    ') or not(l.strip())):
-    datalines.append('\n'.join(group))
+
+def extract_groupby_sample():
+  datalines = []
+  for key, group in groupby(data.splitlines(), key=lambda l: l.startswith('    ') or not(l.strip())):
+      datalines.append('\n'.join(group))
+
+
+class SmartData:
+  # 包裹 collection 对象的 wrapper, 为 dict 和 list 提供更简单的接口
+  @classmethod
+  def auto_wrap(cls, value):
+    if isinstance(value, (list, dict)):
+      return SmartData(value)
+    else:
+      return value
+
+  def __init__(self, data):
+    self.data = data
+
+  def __getitem__(self, n):
+    value = self.data[n]
+    return SmartData.auto_wrap(value)
+
+  def __getattr__(self, key):
+    if isinstance(self.data, dict):
+      value = self.data.get(key)
+      return SmartData.auto_wrap(value)
+    if isinstance(self.data, list):
+      if key == 'first':
+        key = 0
+      if key == 'last':
+        key = -1
+      value = self.data[key]
+      return SmartData.auto_wrap(value)
+
+  def extract(self, key):
+    return [elem.get(key) for elem in self.data]
+
+  def __eq__(self, other):
+    if isinstance(other, SmartData):
+      return self.data == other.data
+    else:
+      return self.data == other
