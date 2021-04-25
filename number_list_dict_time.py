@@ -351,8 +351,42 @@ def duration_from_humanize(expr):
 
 
 
+# Random Rollor
+import random
+class Roller():
 
+  def __init__(self, seed=None):
+    if seed is None:
+      seed = random.randint(1, 999)
+    self.init_seed = seed
+    self.fields = {}
+    self.seeds = {}
 
+  def _choice(self, field, seed):
+    random.seed(seed)
+    if isinstance(field, set) or isinstance(field, list):
+      return random.choice(field)
+    elif isinstance(field, range):
+      return random.randrange(field.start, field.stop, field.step)
+    else:
+      raise NotImplmentedError
+
+  def add(self, **kvargs):
+    for key, value in kvargs.items():
+      self.fields[key] = value
+
+  def __getattr__(self, name):
+    if name in self.fields:
+      seed = self.seeds.get(name, self.init_seed) + 1
+      self.seeds[name] = seed
+      return self._choice(self.fields[name], seed)
+    else:
+      raise NameError(f'Key={name} not found')
+
+# roller = Roller(24)
+# roller.add(paramA=range(10, 40, 3), paramB=[0,3,4,5])
+# roller.paramA, roller.paramB
+# # 对于同样的 Roller(24), 调用多次 .paramA, 一定会生成决定的值
 
 
 
