@@ -20,7 +20,9 @@ cells = sheet2.Range('E6:H7')
 for cell in cells:
   print(repr(cell.Value))
 
-
+# 遍历选择区
+for cell in app.Selection:
+  iter cell
 
 """找到cell上方的带有数据的cell
 """

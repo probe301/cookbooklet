@@ -224,3 +224,24 @@ t2.join()
 # 2. 多线程多join的情况下，依次执行各线程的join方法，前头一个结束了才能执行后面一个
 # 3. 无参数，则等待到该线程结束，才开始执行下一个线程的join
 # 4. 参数timeout为线程的阻塞时间，如 timeout=2 就是罩着这个线程2s 以后，就不管他了，继续执行下面的代码
+
+
+# 线程超时退出方式
+# 也有人用装饰器的方式去做, 那个使用起来更简明
+def run_in_thread(self, func, timeout=5):
+  # 未仔细测试
+  status = 'not executed'
+  def _fn():
+    nonlocal status
+    func()
+    status = 'done'
+
+  t2 = threading.Thread(target=_fn)
+  t2.start()
+  t2.join(timeout=timeout)
+
+  if status == 'done':
+    return True
+  else:
+    log.error(f'thread {_fn} cannot response in {timeout} seconds')
+    raise TimeoutError

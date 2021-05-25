@@ -1,4 +1,13 @@
 
+def shell_color(text, color='cyan'):
+  color_dict = {
+    'black': '0;30', 'darkgray': '1;30', 'red': '0;31', 'lightred': '1;31', 'green': '0;32', 'lightgreen': '1;32', 'orange': '0;33',
+    'yellow': '1;33', 'blue': '0;34', 'lightblue': '1;34', 'purple': '0;35', 'lightpurple': '1;35', 'cyan': '0;36',
+    'lightcyan': '1;36', 'lightgray': '0;37', 'white': '1;37',
+  }
+  return "\033[{}m{}\033[0m".format(color_dict.get(color, '0'), text)
+
+
 
 import pprint
 pp = pprint.PrettyPrinter(width=160, compact=True).pprint
@@ -402,3 +411,106 @@ def pyshould_test_sample():
         self.assertTrue(element in self.seq)
 
   unittest.main()
+
+
+
+# My Should
+class should:
+  '''
+  断言函数
+      0         | should.be(0)                # ok
+      0         | should.be(1)                # this raise Exception
+      [1, 2, 3] | should.sum_to(6)            # ok
+      "123"     | should.be(123)              # .be 类型不匹配，报 bug
+      "123"     | should.like(123)            # .like iB LH batt ok
+      " 123  "  | should.like(123)            # 这样也算是 ok
+      [0, 0, 0] | should.be list_of_zeroes()  # ok
+  '''
+
+  bug_info = None
+  test_cls = None
+
+  def __init__(self, expect, validation_method):
+    '''
+    description: 初始化一个 should 对象, 内部使用
+    :param expect:        使用者的预期值
+    :param validation method: 校验方式, 可以是:
+    值相同
+    值类似，比如 "2" 和 2 算作类似, 即使分别为字符串和整型
+                    元素的总和相等，
+    :return: 返回 None
+    '''
+    self.expect = expect
+    self.validation_method = validation_method
+
+  @classmethod
+  def be(cls, expect):
+    return should(expect, 'equal')
+
+  def equal(cls, expect):
+    return should(expect, 'equal')
+
+  def validate_by_equal(self) :
+    return self.real == self.expect
+
+  @classmethod
+  def like(cls, expect):
+    return should(expect, 'like')
+
+  def validate_by_like(self):
+    return str(self.real).strip() == str(self.expect).strip()
+
+  @classmethod
+  def sum_to(cls, expect):
+    return should(expect, 'sum_to')
+
+  def validate_by_sum_to(self):
+    return sum(self.real) == self.expect
+
+  @classmethod
+  def be_list_of_zeroes(cls, expect=None) :
+    return should(expect, 'be_list_of_zeroes')
+
+  def validate_by_be_list_of_zeroes(self):
+    real = self.real
+    if not isinstance(real, list):
+      return False
+    if not real:
+      return False
+    if sum(int(elem) for elem in real) != 0:
+      return False
+    return True
+
+  def validate(self):
+    '''
+    description: 按照预设的 validation_method 执行相应的检测器
+    :return: 返回 True False
+    '''
+    if hasattr(self, f'validate_by_{self.validation_method}'):
+      validater = getattr(self, f'validate_by_{self.validation_method}')
+      return validater()
+    raise RuntimeError(f'cannot find validate method {self.validation_method}')
+
+  def __ror__(self, real):
+    '''
+    description: 常规调用方式，
+    一般这么调用 get_ result(...) | should.like('rexpected result')
+    :param real:           实际值，即 __ror__ 的左值，此值与本 should 对象无关
+
+    :return: 返回 True or raise Exception
+    '''
+    self.real = real
+    if self.validate():
+      return True
+    else:
+      msg = f'got {self.real!r}, but should be {self.expect!r}"'
+      if not self.bug_info:   # 此时没有设置该怎么报pug，raise 断言错误
+        raise AssertionError(msg)
+
+# 0         | should.be(0)                # ok
+# 0         | should.be(1)                # this raise Exception
+# [1, 2, 3] | should.sum_to(6)            # ok
+# "123"     | should.be(123)              # .be 类型不匹配，报 bug
+# "123"     | should.like(123)            # .like iB LH batt ok
+# " 123  "  | should.like(123)            # 这样也算是 ok
+# [0, 0, 0] | should.be list_of_zeroes()  # ok
