@@ -166,6 +166,10 @@ def joiner(iterable, sep='\n', indent=0, precision=None):
   return sep.join(' ' * indent + format_element(elem) for elem in iterable)
 
 
+# next() 返回第一个符合要求的元素
+array= [3, 5, 6, 2, 8, -2, 12]
+next(i for i in array if i % 4 == 0)    # >>> 8
+
 
 
 

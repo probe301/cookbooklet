@@ -24,10 +24,10 @@ class MyList(list):
   def __repr__(self):
     return '<' + '|'.join(map(repr, self)) + '>'
 
-# m = MyList('abc')
+# m = MyList('abc')   # >>> 'None'
 # m.append(m)
 # m.append('x')
-# print(m)
+# print(m)            # >>> <'a'|'b'|'c'|...|'x'>
 
 '''演示typing Union用法'''
 from typing import Union
