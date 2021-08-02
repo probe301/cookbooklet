@@ -31,7 +31,7 @@ class MyList(list):
 
 '''演示typing Union用法'''
 from typing import Union
-def (a: Union[str, int]):
+def(a: Union[str, int]):
   if isinstancec(a, str):
     print(a*2)
   elif isinstancec(a, int):
@@ -39,6 +39,29 @@ def (a: Union[str, int]):
 
 def post_xml(data: Union[str, ET.Element]):
   pass
+
+
+
+"""--------------
+异常捕获
+--------------"""
+# 除了 try expect 之外, 还可以用 contextlib.suppress 忽略指定的异常
+
+from contextlib import suppress
+with suppress(KeyError):
+  d = dict(key1='value1', key2='value2')
+  print(d['key1'])
+  print(d['key_not_found'])   # 会忽略这个 KeyError 异常
+  print(d['key2'])
+
+print()
+
+with suppress(KeyError):
+  d = dict(key3='value3', key4='value4')
+  print(d['key3'])
+  print(100 / 0)   # 但不会忽略这个异常
+  print(d['key4'])
+
 
 
 """--------------

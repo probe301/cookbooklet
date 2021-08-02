@@ -717,3 +717,42 @@ class CryptorAES():
     cryptor = AES.new(key, self.mode, key)
     plain = cryptor.decrypt(a2b_hex(text))
     return bytes.decode(plain.strip(b'\0'), errors="ignore")
+
+
+
+"""--------------
+包裹内建类
+--------------"""
+# 可以包裹内建类, 比如 int str 等, 写自定义的方法搞成链式调用
+# 包裹为 Int(int), Str(str), List(list) 都成功了
+# 但是不会包裹迭代器, 需要再研究 TODO
+class Str(str):
+    def __init__(self, t):
+        self.t = t
+    def remove(self, x):
+        return Str(self.t.replace(x, ''))
+    def after(self, x):
+        return Str(self.t.split(x)[-1])
+    def before(self, x):
+        return Str(self.t.split(x)[0])
+Str('abcdefg').after('b').before('g').remove('e')   # 'cdf'
+
+import itertools
+import collections
+class List(collections.UserList):
+    def __init__(self, l):
+        self.data = list(l)
+    def slide(self, length):
+        for i in range(len(self.data)//length):
+            yield self.data[i*length:i*length+length]
+        if i*length < len(self.data):
+            yield self.data[i*length+length:]
+    def head(self, n):
+        return List(self.data[:n])
+    def tail(self, n):
+        return List(self.data[-n:])
+
+for clip in List(range(1, 20)).slide(3):
+  print(clip)
+
+List(range(1, 20)).head(10).tail(3)   # [8, 9, 10]
