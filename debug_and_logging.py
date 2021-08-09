@@ -31,7 +31,7 @@ class MyList(list):
 
 '''演示typing Union用法'''
 from typing import Union
-def(a: Union[str, int]):
+def func(a: Union[str, int]):
   if isinstancec(a, str):
     print(a*2)
   elif isinstancec(a, int):
@@ -444,14 +444,11 @@ class should:
       0         | should.be(0)                # ok
       0         | should.be(1)                # this raise Exception
       [1, 2, 3] | should.sum_to(6)            # ok
-      "123"     | should.be(123)              # .be 类型不匹配，报 bug
-      "123"     | should.like(123)            # .like iB LH batt ok
+      "123"     | should.be(123)              # .be 类型不匹配, 报 bug
+      "123"     | should.like(123)            # .like 两值都转字符串后大致对上就算过
       " 123  "  | should.like(123)            # 这样也算是 ok
       [0, 0, 0] | should.be list_of_zeroes()  # ok
   '''
-
-  bug_info = None
-  test_cls = None
 
   def __init__(self, expect, validation_method):
     '''
@@ -459,17 +456,25 @@ class should:
     :param expect:        使用者的预期值
     :param validation method: 校验方式, 可以是:
     值相同
-    值类似，比如 "2" 和 2 算作类似, 即使分别为字符串和整型
-                    元素的总和相等，
+    值类似, 比如 "2" 和 2 算作类似, 即使分别为字符串和整型
+                    元素的总和相等,
     :return: 返回 None
     '''
     self.expect = expect
     self.validation_method = validation_method
 
   @classmethod
+  def set_training_mode(cls, flag):
+    cls.training_mode = flag
+    if flag:
+      with open('./should.training.log', 'w', encoding='utf-8') as f:
+        f.write('start training mode\n')
+
+  @classmethod
   def be(cls, expect):
     return should(expect, 'equal')
 
+  @classmethod
   def equal(cls, expect):
     return should(expect, 'equal')
 
@@ -484,11 +489,56 @@ class should:
     return str(self.real).strip() == str(self.expect).strip()
 
   @classmethod
+  def starts_with(cls, expect):
+    return should(expect, 'starts_with')
+
+  def validate_by_starts_with(self):
+    return str(self.real).strip().startswith(str(self.expect).strip())
+
+  @classmethod
   def sum_to(cls, expect):
     return should(expect, 'sum_to')
 
   def validate_by_sum_to(self):
     return sum(self.real) == self.expect
+
+  @classmethod
+  def contains(cls, expect):
+    return should(expect, 'contains')
+
+  def validate_by_contains(self):
+    if isinstance(self.real, (list, tuple, dict)):
+      return self.expect in self.real
+    else:
+      return False
+
+  @classmethod
+  def match_sequence(cls, expect):
+    # dict 或 list 中能匹配到 expect[] 中的指定顺序的元素
+    # list('abcd') | should.match_sequence(['a', 'b'])          # True
+    # list('abcd') | should-match_sequence(['a', 'c', 'd'])     # True
+    # list('abbbacd') | should.match_sequence(['a', 'b'])       # True
+    # list('abbbacd') | should.match_sequence(['b', 'a', 'd'])  # True
+    # list('abcd') | should-match_sequence(['e', 'f', 'g'])     # False
+    # list('abcd') | should-match_sequence(['c', 'a'])          # False
+    # [] | should.match_sequence(['a', 'b'])                    # False
+    return should(expect, 'match_sequence')
+
+  def validate_by_match_sequence(self):
+    if not isinstance(self.real, (list, tuple)):
+      return False
+    if not isinstance(self.expect, (list, tuple)):
+      return False
+    if len(self.real) < len(self.expect):
+      return False
+    temp_real = self.real.copy()
+    for expect_elem in self.expect:
+      if expect_elem not in temp_real:
+        return False
+      else:   # 如果在 temp_real 中能取到 expect_eLem, 则截掉 temp_real 的 index 之前的部分
+        temp_real = temp_real[temp_real.index(expect_elem)+1:]
+        continue
+    return True
 
   @classmethod
   def be_list_of_zeroes(cls, expect=None) :
@@ -516,24 +566,24 @@ class should:
 
   def __ror__(self, real):
     '''
-    description: 常规调用方式，
+    description: 常规调用方式,
     一般这么调用 get_ result(...) | should.like('rexpected result')
-    :param real:           实际值，即 __ror__ 的左值，此值与本 should 对象无关
+    :param real:           实际值, 即 __ror__ 的左值, 此值与本 should 对象无关
 
     :return: 返回 True or raise Exception
     '''
     self.real = real
     if self.validate():
       return True
-    else:
-      msg = f'got {self.real!r}, but should be {self.expect!r}"'
-      if not self.bug_info:   # 此时没有设置该怎么报pug，raise 断言错误
-        raise AssertionError(msg)
 
-# 0         | should.be(0)                # ok
-# 0         | should.be(1)                # this raise Exception
-# [1, 2, 3] | should.sum_to(6)            # ok
-# "123"     | should.be(123)              # .be 类型不匹配，报 bug
-# "123"     | should.like(123)            # .like iB LH batt ok
-# " 123  "  | should.like(123)            # 这样也算是 ok
-# [0, 0, 0] | should.be list_of_zeroes()  # ok
+    # 以下都是不合预期时候的处理
+    msg = f'got {self.real!r}, but should be {self.expect!r}"'
+
+    if self.training_mode:  # 此时记录不正确的预期数据, 不做 raise Exception
+      with open('should.training.log', 'a', encoding='utf-8') as f:
+        f.write(f'{msg}\n')
+      time.sleep(1)
+      return False
+    else:  # 此时 raise Exception
+      log.error(msg)
+      raise AssertionError(msg)
