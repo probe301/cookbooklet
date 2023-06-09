@@ -287,7 +287,7 @@ def json_load(path):
   return data
 def json_save(data, path):
   with open(path, 'w', encoding='utf-8') as f:
-    json.dump(data, f)
+    json.dump(data, f, indent=4)
 def json_loads(s):
   return json.loads(s)
 def json_saves(data):
@@ -726,16 +726,209 @@ class CryptorAES():
 # 可以包裹内建类, 比如 int str 等, 写自定义的方法搞成链式调用
 # 包裹为 Int(int), Str(str), List(list) 都成功了
 # 但是不会包裹迭代器, 需要再研究 TODO
-class Str(str):
+class StrDemo(str):
     def __init__(self, t):
         self.t = t
     def remove(self, x):
-        return Str(self.t.replace(x, ''))
+        return StrDemo(self.t.replace(x, ''))
     def after(self, x):
-        return Str(self.t.split(x)[-1])
+        return StrDemo(self.t.split(x)[-1])
     def before(self, x):
-        return Str(self.t.split(x)[0])
-Str('abcdefg').after('b').before('g').remove('e')   # 'cdf'
+        return StrDemo(self.t.split(x)[0])
+StrDemo('abcdefg').after('b').before('g').remove('e')   # 'cdf'
+
+
+
+class Str(str):
+    def __init__(self, t):
+        self.t = t
+
+    def length(self, encoding=None):
+        ''' encode='gbk' 计算长度时, 中文字符视为长度2, 这样统计字数方便对齐
+            encode='utf-8' 计算长度时, 中文字符视为长度3
+            encode=None 使用普通的 len(text) 计算长度'''
+        return len(self.t.encode(encoding) if encoding else self.t)
+
+    def remove(self, x):
+        return Str(self.t.replace(x, ''))
+
+    def before_first(self, x):
+        index = self.t.find(x)
+        if index == -1:
+            return Str('')
+        else:
+            return Str(self.t[0:index])
+
+    def before_last(self, x):
+        index = self.t.rfind(x)
+        if index == -1:
+            return Str('')
+        else:
+            return Str(self.t[0:index])
+
+    def after_first(self, x):
+        index = self.t.find(x)
+        if index == -1:
+            return Str('')
+        else:
+            return Str(self.t[index+len(x):])
+
+    def after_last(self, x):
+        index = self.t.rfind(x)
+        if index == -1:
+            return Str('')
+        else:
+            return Str(self.t[index+len(x):])
+
+    def starts_with(self, x):
+        if isinstance(x, list):
+            x = tuple(x)
+        return self.t.startswith(x)
+
+    def ends_with(self, x):
+        if isinstance(x, list):
+            x = tuple(x)
+        return self.t.endswith(x)
+
+    def contains(self, x):
+        if isinstance(x, list):
+            x = tuple(x)
+        return any((elem in self.t) for elem in x)
+
+
+    def ensure_start(self, start_string):
+        '''
+            保证字符串的开头一定是 prefix
+            如果 prefix=None, 则 pat 视为普通字符串, 以 pat 作为开头
+            如果 prefix 为有效 string, 则 pat 视为 regexp 来检测
+        '''
+        if self.t.startswith(start_string):
+            return Str(self.t)
+        for i in range(1, len(start_string)):
+            if self.t.startswith(start_string[i:]):
+                return start_string[0:i] + self.t
+        return Str(start_string + self.t)
+
+    def ensure_end(self, end_string):
+        if self.t.endswith(end_string):
+            return Str(self.t)
+        for i in range(len(end_string)-1, 0, -1):
+            if self.t.endswith(end_string[0:i]):
+                return self.t + end_string[i:]
+        return Str(self.t + end_string)
+
+    def remove_start(self, start_string):
+        while self.t:
+            if self.t.startswith(start_string):
+                self.t = self.t[len(start_string):]
+            else:
+                return Str(self.t)
+        return Str(self.t)
+
+    def remove_end(self, end_string):
+        while self.t:
+            if self.t.endswith(end_string):
+                self.t = self.t[:-len(end_string)]
+            else:
+                return Str(self.t)
+        return Str(self.t)
+
+    def between(self, before_pattern, after_pattern, include_pattern=False):
+        ''' 取 text 位于 before_pattern, after_pattern 中间的部分
+            这样尽量截取到最长的一个子串
+        '''
+        result = self.after_first(before_pattern).before_last(after_pattern)
+        if include_pattern:
+            return Str(before_pattern + result + after_pattern)
+        else:
+            return Str(result)
+
+    def extract(self, left_pattern, right_pattern=None):
+        right_pattern = right_pattern or left_pattern
+        text = self.t
+        result = []
+        while text:
+            text = Str(text).after_first(left_pattern).t
+            inside = Str(text).before_first(right_pattern).t
+            if inside: result.append(inside)
+            text = Str(text).after_first(right_pattern).t
+        return result
+
+    def truncate(self, limit=20, show_end=False, ellipsis='...', encoding=None):
+        ''' 截断字符串尾部, 保留指定长度
+            show_end=True 保留开头和结束, 省略中间的字符 TODO
+        '''
+        limit = max(limit, Str(ellipsis).length(encoding))
+        if self.length(encoding) <= limit:
+            return Str(self.t)
+        else:
+            dest_length =  limit - Str(ellipsis).length(encoding)
+            current_index = len(self.t)
+            while Str(self.t[:current_index]).length(encoding) > dest_length:
+                current_index -= 1
+            return Str(self.t[:current_index] + ellipsis)
+
+    # def clean_xml(self, text):
+    #     ''' 清理用于 xml 的有效字符
+    #         曾遇到标题里有字符 backspace \x08, 在 Linux 中无法生成 xml feed
+    #         用于文本内容, 一般不用于路径或 yaml csv 中 '''
+    #     def valid_xml_char_ordinal(c):
+    #         # conditions ordered by presumed frequency
+    #         codepoint = ord(c)
+    #         return (0x20 <= codepoint <= 0xD7FF or
+    #                 codepoint in (0x9, 0xA, 0xD) or
+    #                 0xE000 <= codepoint <= 0xFFFD or
+    #                 0x10000 <= codepoint <= 0x10FFFF)
+    #     return ''.join(c for c in text if valid_xml_char_ordinal(c))
+
+    def clean(self, text,
+              invalid_chars={':', '*', '?', '"', "'", '<', '>', '|', '\r', '\n', '\t'},
+              replacer='', combine_whitespaces=True):
+        ''' 清理无效字符, 用于文件路径, 配置字段, 或 yaml csv 等
+            for_path = True     允许出现 `/` 和 `\\`
+            for_path = False    只保留纯文件名, 不能出现 `/` 和 `\\`'''
+        # text = clean_xml(dirty)
+        invalid_chars = set(invalid_chars)
+        text = ''.join([replacer if c in invalid_chars else c for c in str(text)])
+        if combine_whitespaces:
+            text = re.sub(r'\s+', ' ', text).strip()
+        return Str(text)
+
+    def to_filename(self):
+        invalid_chars = {':', '*', '?', '"', "'", '<', '>', '|', '\r', '\n', '\t'}
+        # invalid_chars.update({'/', '\\', ' '})
+        invalid_chars.update({'/', '\\'})
+        return self.clean(self.t, invalid_chars, replacer='-')
+
+    def to_path(self):
+        return self.clean(self.t, replacer='-')
+
+    def to_title(self):
+        invalid_chars = {':', '*', '?', '"', "'", '<', '>', '|', '\r', '\n', '\t', '[', ']', '{', '}', '/'}
+        return self.clean(self.t, invalid_chars, replacer='-')
+    # def extract_inside(self, before_pattern, after_pattern):
+    #     ''' 取 text 位于 before_pattern, after_pattern 中间的部分
+    #         返回所有的匹配结果 array of string
+    #         如果 before_pattern after_pattern 相同
+    #         则以之作为分隔符, 返回中间部分
+    #     '''
+    #     if before_pattern == after_pattern or after_pattern is None:
+    #         pat = make_regexp(before_pattern)
+    #         texts = pat.split(text)
+    #         return texts[1:-1] if len(texts) > 2 else []
+    #     else:
+    #         pat = make_regexp(before_pattern + r'(?P<inside_token>.*?)' + after_pattern)
+    #         matches = list(pat.finditer(text))
+    #         if not matches:
+    #             return []
+    #         else:
+    #             return [mat.group('inside_token') for mat in matches]
+
+# Str('abcdefg').after('b').before('g').remove('e')   # 'cdf'
+
+# end of Str()
+
+
 
 import itertools
 import collections
@@ -756,3 +949,70 @@ for clip in List(range(1, 20)).slide(3):
   print(clip)
 
 List(range(1, 20)).head(10).tail(3)   # [8, 9, 10]
+
+
+
+def unmark_text(text):
+    '''md文本转纯文本'''
+    from markdown import Markdown
+    from io import StringIO
+
+    def unmark_element(element, stream=None):
+        if stream is None:
+            stream = StringIO()
+        if element.text:
+            stream.write(element.text)
+        for sub in element:
+            unmark_element(sub, stream)
+        if element.tail:
+            stream.write(element.tail)
+        return stream.getvalue()
+
+    # patching Markdown
+    Markdown.output_formats["plain"] = unmark_element
+    __md = Markdown(output_format="plain")
+    __md.stripTopLevelTags = False
+    return __md.convert(text)
+
+
+
+
+
+class FileCache:
+    def __init__(self, folder):
+        self.folder = folder
+
+    @classmethod
+    def load_from(cls, folder='.cache'):
+        if not os.path.exists(folder):
+            os.makedirs(folder, exist_ok=True)
+        return cls(folder)
+
+    def find(self, key) -> str:
+        key = self.hash_key(key)
+        for filename in all_files(self.folder, '*'):
+            if key == os.path.basename(filename):
+                return text_load(filename)
+        return ''
+
+    def save(self, key, content):
+        key = self.hash_key(key)
+        text_save(f'{self.folder}/{key}', content)
+        return content
+
+    def clear(self):
+        for filename in all_files(self.folder, '*'):
+            os.remove(filename)
+        return True
+
+    def hash_key(self, key):
+        return Str(key).to_filename()[:190] + '-' + md5(key)
+
+# end of class FileCache
+
+
+
+def md5(text, n=10):
+    ''' 字符串 key 转为定长向量 '''
+    import hashlib
+    return hashlib.md5(str.encode(text.strip())).hexdigest()[:n]

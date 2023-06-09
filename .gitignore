@@ -1,0 +1,18 @@
+
+
+.pytest_cache
+.vscode
+desktop.ini
+__pycache__
+.code-workspace
+.cache
+tests/tempCodeRunnerFile.py
+
+.obsidian/*
+feeds/*
+notes/*
+*.log
+
+# Ignore Smart Connections folder because embeddings file is large and updated frequently
+.smart-connections
+
