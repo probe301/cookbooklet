@@ -51,6 +51,15 @@ def download_image(url, path):
   print('done')
 
 
+def download_image2(url, folder, name, referer):
+    print(f'download img {url} ...')
+    default_headers = {"User-Agent": "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.13 Safari/537.36"}
+    headers = {"Referer": referer}
+    resp = session.get(url, headers={**default_headers, **headers}, stream=True)
+    image_body = resp.content
+    with open(f'{folder + "/" + name}', "wb") as f:
+        f.write(image_body)
+    print(f'get image {name} done')
 
 
 
@@ -122,7 +131,7 @@ author_id = div.attrib['href'].split('/')[-1]
 
 """
 sample
-selenium custom driver 
+selenium custom driver
 css selector
 """
 

@@ -120,6 +120,7 @@ def microtest(modulename, verbose=None, log=sys.stdout):
 --------------"""
 from pprint import pprint
 from datetime import datetime
+
 class create_logger:
   def __init__(self, file_path):
     self.filepath = file_path + '.log'
@@ -131,7 +132,7 @@ class create_logger:
     if prefix:
       print(prefix, file=out, end=' ')
     if pretty:
-      pprint(data, stream=out, width=80, compact=True, depth=2)
+      pprint(data, stream=out, width=120, compact=True, depth=3, sort_dicts=False)
     else:
       print(data, file=out)
     # if filepath:
@@ -157,8 +158,8 @@ class create_logger:
 
 # usage
 # from tools import create_logger
-# log = create_logger(__file__)
-# log_error = create_logger(__file__ + '.error')
+# logi = create_logger(__file__)
+# loge = create_logger(__file__ + '.error')
 
 
 
@@ -480,6 +481,13 @@ class should:
 
   def validate_by_equal(self) :
     return self.real == self.expect
+
+  @classmethod
+  def near(cls, expect):
+      return should(expect, 'near')
+
+  def validate_by_near(self):
+    return abs(self.real - self.expect) <= 0.01
 
   @classmethod
   def like(cls, expect):

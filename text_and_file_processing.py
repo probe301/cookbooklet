@@ -1016,3 +1016,22 @@ def md5(text, n=10):
     ''' 字符串 key 转为定长向量 '''
     import hashlib
     return hashlib.md5(str.encode(text.strip())).hexdigest()[:n]
+
+
+
+def guess_lang_pygments(code):
+  # pygments lexers 非常不准
+  from pygments.lexers import guess_lexer
+  lang = guess_lexer(code).name.lower()
+  if lang == 'text only': lang = 'text'
+  return lang
+
+def guess_lang(code):
+  # guesslang 好一些
+  from guesslang import Guess
+  name = Guess().language_name(code)
+  return name.lower()
+
+
+def quote_text(text):
+    return '\n'.join('> '+line for line in text.split('\n'))
