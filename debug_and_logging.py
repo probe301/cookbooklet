@@ -119,7 +119,7 @@ def microtest(modulename, verbose=None, log=sys.stdout):
 同时 log 到 stdout 和 file.log
 --------------"""
 from pprint import pprint
-from datetime import datetime
+import datetime
 
 class create_logger:
   def __init__(self, file_path):
@@ -127,7 +127,7 @@ class create_logger:
   def custom_print(self, data, prefix='', filepath=None, pretty=False):
     out = open(filepath, 'a', encoding='utf-8') if filepath else sys.stdout
     if filepath:  # 在输出到文件时增加记录时间戳, 输出到 stdout 不记录时间戳
-      prefix = '[' + datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + ']' + prefix
+      prefix = '[' + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + ']' + prefix
 
     if prefix:
       print(prefix, file=out, end=' ')
@@ -137,31 +137,28 @@ class create_logger:
       print(data, file=out)
     # if filepath:
     #   out.close()
-  def output(self, values, pretty=False):
-    if len(values) == 1:
-      s = values[0]
-    else:
-      s = ', '.join(str(v) for v in values)
+  def output(self, value, pretty=False):
+    # 首先输出到控制台, 其次文件
     try:
-      self.custom_print(s, filepath=None, pretty=pretty)
+      self.custom_print(value, filepath=None, pretty=pretty)
     except UnicodeEncodeError as e:
       self.custom_print(str(e), prefix='logger output error: ')
     try:
-      self.custom_print(s, filepath=self.filepath, pretty=pretty)
+      self.custom_print(value, filepath=self.filepath, pretty=pretty)
     except UnicodeEncodeError as e:
       self.custom_print(str(e), filepath=self.filepath, prefix='logger output error: ')
-  def __ror__(self, *other):
+
+  def __ror__(self, other):  # 还是先改成只接受一个参数
     self.output(other, pretty=True)
     return other
-  def __call__(self, *other, pretty=False):
+  def __call__(self, other, pretty=False):
     self.output(other, pretty=pretty)
+    return other
 
 # usage
 # from tools import create_logger
 # logi = create_logger(__file__)
 # loge = create_logger(__file__ + '.error')
-
-
 
 
 
