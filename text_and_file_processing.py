@@ -252,7 +252,7 @@ def yaml_load(path, loader=IncludeOrderedLoader):
     result = yaml.load(f, loader)
   return result
 
-def yaml_save(data, path):
+def yaml_save(path, data):
   '''支持中文, 可以识别 OrderedDict'''
   class OrderedDumper(yaml.SafeDumper):
     pass
@@ -285,7 +285,7 @@ def json_load(path):
   with open(path, 'r', encoding='utf-8') as f:
     data = json.load(f)
   return data
-def json_save(data, path):
+def json_save(path, data):
   with open(path, 'w', encoding='utf-8') as f:
     json.dump(data, f, indent=4, ensure_ascii=False)
 def json_loads(s):
@@ -360,7 +360,7 @@ def csv_load(path, sample=10, only_title=False, include=(), exclude=()):
   return result
 
 import csv
-def csv_save(headers, data, filename):
+def csv_save(filename, headers, data):
   # 将 obj 存储到 csv
   # headers = ['Symbol','Price','Date','Time','Change','Volume']
   # rows = [('AA', 39.48, '6/11/2007', '9:36am', -0.18, 181800),

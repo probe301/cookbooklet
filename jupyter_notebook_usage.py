@@ -8,6 +8,12 @@
 # data processing import
 # ==============================
 
+
+# %load_ext autoreload
+# %autoreload 2
+import sys, os, re
+print(sys.version)
+import pathlib
 import json
 import yaml
 import csv
