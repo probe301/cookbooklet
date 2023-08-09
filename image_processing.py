@@ -24,9 +24,10 @@ def crop_image(input, output, left, top, right, bottom):
 
 
 
-# 要在 Python 中读取 PDF 并裁剪指定页面的坐标区域，你可以使用 PyPDF2 或 PyMuPDF 这类 PDF 处理库。下面是一个使用 PyMuPDF 的示例代码，其中 page_num 变量指定了要裁剪的页面编号，x1，y1，x2，y2 变量指定了要裁剪的矩形区域的左上角和右下角坐标： #viaPoe
+
 
 def fitz_crop_pdf_page(page_num):
+    '''读取 PDF 并裁剪指定页面的坐标区域，你可以使用 PyPDF2 或 PyMuPDF 这类 PDF 处理库。下面是一个使用 PyMuPDF 的示例代码，其中 page_num 变量指定了要裁剪的页面编号，x1，y1，x2，y2 变量指定了要裁剪的矩形区域的左上角和右下角坐标： #viaPoe'''
     import fitz  # fitz = PyMuPDF
 
     doc = fitz.open('example.pdf')
@@ -100,16 +101,14 @@ def baidu_ocr_one_page_merge_txt(data):
 def baidu_ocr_one_page_save(image_path, data, overwrite=True):
     result_json = data
     result_txt = baidu_ocr_one_page_merge_txt(data)
-    chapter = Str(image_path).before_last('/').after_last('/')
-    result_txt = post_process_data(result_txt, chapter)
     result_txt_path = image_path.replace('.jpg', '.txt')
     result_json_path = image_path.replace('.jpg', '.json')
     if overwrite == False:
         assert not pathlib.Path(result_txt_path).exists()
         assert not pathlib.Path(result_json_path).exists()
-    pylon.text_save(result_txt_path, result_txt)
-    pylon.json_save(path=result_json_path, data=result_json)
-    print(f'save to {result_txt_path} {result_json_path} done')
+    # pylon.text_save(result_txt_path, result_txt)
+    # pylon.json_save(path=result_json_path, data=result_json)
+    # print(f'save to {result_txt_path} {result_json_path} done')
 
 
 
