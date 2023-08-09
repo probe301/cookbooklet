@@ -952,6 +952,7 @@ List(range(1, 20)).head(10).tail(3)   # [8, 9, 10]
 
 
 
+
 def unmark_text(text):
     '''md文本转纯文本'''
     from markdown import Markdown
@@ -1077,3 +1078,105 @@ def try_swalign(body, quote):
         return similar_match, body_slice
     else:
         return None, None
+
+
+
+# 统计代码行数
+def code_file_sum():
+    import os
+    # 定义代码所在的目录
+    root_path = 'C:/Coding/sg3_utils/'
+
+    def collect_files(path, ext=('.c', '.h')):
+        filelist = []
+        for parent, dirnames, filenames in os.walk(path):
+            for filename in filenames:
+                if filename.endswith(ext):
+                    # 将文件名和目录名拼成绝对路径，添加到列表里
+                    filelist.append(os.path.join(parent, filename))
+        return filelist
+
+    # 计算单个文件内的代码行数
+    def calc_linenum(file):
+        with open(file) as fp:
+            content_list = fp.readlines()
+            code_num = 0     # 当前文件代码行数计数变量
+            blank_num = 0    # 当前文件空行数计数变量
+            annotate_num =0  # 当前文件注释行数计数变量
+            for content in content_list:
+                content = content.strip()
+                if content == '':
+                    blank_num += 1
+                elif content.startswith('#'):
+                    annotate_num += 1
+                else:
+                    code_num += 1
+        # 返回代码行数，空行数，注释行数
+        return code_num, blank_num, annotate_num
+
+    def sum_lines(path):
+        print(f'in {path}')
+        files = collect_files(path)
+        total_code_num = 0      # 统计文件代码行数计数变量
+        total_blank_num = 0     # 统计文件空行数计数变量
+        total_annotate_num = 0  # 统计文件注释行数计数变量
+        for f in files:
+            code_num, blank_num, annotate_num = calc_linenum(f)
+            total_code_num += code_num
+            total_blank_num += blank_num
+            total_annotate_num += annotate_num
+        print('代码总行数为：  %s' % total_code_num)
+        print('空行总行数为：  %s' % total_blank_num)
+        print('注释行总行数为： %s' % total_annotate_num)
+
+
+    def show_all():
+        folders = '''
+            debian
+            doc
+            examples
+            getopt_long
+            include
+            inhex
+            lib
+            scripts
+            src
+            suse
+            testing
+            utils
+        '''.strip().splitlines()
+        for folder in folders:
+            # print(folder)
+            sum_lines(root_path + folder.strip())
+
+    show_all()
+
+
+def match_token(params, choices):
+    '''检查列表 params 中, 是否有能匹配 choices 中的元素, 否则返回 choices[0] 默认元素'''
+    filtered_params = list(set(params) & set(choices))
+    return filtered_params[0] if filtered_params else choices[0]
+
+
+def detect_keyword(text, choices, default=None):
+    ''' 检查文本 text 中, 是否有能匹配 choices 中的元素, 并返回映射后的结果,
+        choices 可以是 list<str> or dict<str: str>
+        choices = dict 时, 优先匹配 values(), 然后匹配 keys()
+        如果全部没有匹配, 返回 default 默认元素'''
+    if isinstance(choices, list):
+        for c in choices:
+            assert c
+            if c in text:
+                return c
+        else:
+            return default
+    if isinstance(choices, dict):
+        for c in choices.values():
+            if c and c in text:  # c 必须有有效值
+                return c
+        for c in choices.keys():
+            assert c
+            if c in text:
+                return choices.get(c)
+        else:
+            return choices.get(default)  # default 应改为 choices 的 key
