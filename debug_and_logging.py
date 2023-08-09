@@ -122,43 +122,76 @@ from pprint import pprint
 import datetime
 
 class create_logger:
-  def __init__(self, file_path):
+  def __init__(self, file_path, pretty_format='print'):
+    # pretty_format = pprint print brief
     self.filepath = file_path + '.log'
-  def custom_print(self, data, prefix='', filepath=None, pretty=False):
+    self.pretty_format = pretty_format
+
+  def brief_format(self, data):
+    # 简略处理 str list dict 等 # 认为此时不会有复杂对象
+    if isinstance(data, str):
+        if len(data) < 300:
+            return data
+        else:
+            return data[:240] + ' ... ' + data[-50:] + f' ({len(data)} chars)'
+    if isinstance(data, list):
+        if len(data) < 20:
+            return data
+        else:
+            return data[:10] + [f' ... (total {len(data)} items) ... ' ] + data[-5:]
+    if isinstance(data, dict):
+        length = len(data.keys())
+        if length < 20:
+            return data
+        else:
+            return '\n'.join(f'({i}) {k}: {v}' for i, (k, v) in enumerate(
+                data.items()) if (i < 10 or i + 5 > length)
+                ) + f' (total {length} keypairs)'
+    # 其余默认不处理
+    return data
+
+  def custom_print(self, data, prefix='', filepath=None, pretty=None):
+    pretty = pretty or self.pretty_format
     out = open(filepath, 'a', encoding='utf-8') if filepath else sys.stdout
     if filepath:  # 在输出到文件时增加记录时间戳, 输出到 stdout 不记录时间戳
       prefix = '[' + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f") + ']' + prefix
 
     if prefix:
       print(prefix, file=out, end=' ')
-    if pretty:
+
+    if pretty == 'pprint':
       pprint(data, stream=out, width=120, compact=True, depth=3, sort_dicts=False)
+    elif pretty == 'brief':
+      print(self.brief_format(data), file=out)
     else:
       print(data, file=out)
     # if filepath:
     #   out.close()
-  def output(self, value, pretty=False):
+  def output(self, data, pretty):
     # 首先输出到控制台, 其次文件
     try:
-      self.custom_print(value, filepath=None, pretty=pretty)
+      self.custom_print(data, filepath=None, pretty=pretty)
     except UnicodeEncodeError as e:
       self.custom_print(str(e), prefix='logger output error: ')
     try:
-      self.custom_print(value, filepath=self.filepath, pretty=pretty)
+      self.custom_print(data, filepath=self.filepath, pretty=pretty)
     except UnicodeEncodeError as e:
       self.custom_print(str(e), filepath=self.filepath, prefix='logger output error: ')
 
   def __ror__(self, other):  # 还是先改成只接受一个参数
-    self.output(other, pretty=True)
+    self.output(other, self.pretty_format)
     return other
-  def __call__(self, other, pretty=False):
+  def __call__(self, other, pretty='pprint'):
     self.output(other, pretty=pretty)
     return other
 
 # usage
 # from tools import create_logger
+# log = create_logger(__file__)
+# log_error = create_logger(__file__ + '.error')
 # logi = create_logger(__file__)
 # loge = create_logger(__file__ + '.error')
+# l = create_logger(__file__, pretty_format='brief')  # brief print
 
 
 

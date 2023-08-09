@@ -287,7 +287,7 @@ def json_load(path):
   return data
 def json_save(data, path):
   with open(path, 'w', encoding='utf-8') as f:
-    json.dump(data, f, indent=4)
+    json.dump(data, f, indent=4, ensure_ascii=False)
 def json_loads(s):
   return json.loads(s)
 def json_saves(data):
@@ -1035,3 +1035,45 @@ def guess_lang(code):
 
 def quote_text(text):
     return '\n'.join('> '+line for line in text.split('\n'))
+
+def unquote_text(text):
+    return '\n'.join(line[2:] for line in text.split('\n'))
+
+
+def clean_markdown(content):
+    content = content.replace('\r\n', '\n')
+    content = re.sub(r'<!--.+?-->', '\n', content, flags=re.DOTALL)
+    # Obsidian 风格注释
+    content = re.sub(r'\n%%.+?%%\n', '\n\n', content, flags=re.DOTALL)
+    return content
+
+
+
+
+def try_swalign(body, quote):
+    '''
+    根据字符串编辑距离做模糊匹配
+    大段文档时稍慢'''
+    import swalign
+    # 从大段body文字里模糊对齐quote
+    # text = "秦氏道：“婶婶，你是个脂粉队里的英雄  G0088【◎庚辰侧】称得起。"
+    # target = "婶婶是脂粉队的英雄"
+    # match = process.extract(target, re.split(r'[ ，。：“【】]', text)) | logi
+    match = 2
+    mismatch = 0.1
+    scoring = swalign.NucleotideScoringMatrix(match, mismatch)
+    sw = swalign.LocalAlignment(scoring)  # you can also choose gap penalties, etc...
+    alignment = sw.align(body, quote)
+    # out.write("Score: %s\n" % self.score)
+    # out.write("Matches: %s (%.1f%%)\n" % (self.matches, self.identity * 100))
+    # out.write("Mismatches: %s\n" % (self.mismatches,))
+    # out.write("CIGAR: %s\n" % self.cigar_str)
+    alignment.dump()
+
+
+    if alignment.identity > 0.6:
+        body_slice = alignment.r_pos, alignment.r_end,
+        similar_match = body[alignment.r_pos:alignment.r_end]
+        return similar_match, body_slice
+    else:
+        return None, None

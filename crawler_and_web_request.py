@@ -87,6 +87,22 @@ json_data = resp.json()                                               # for json
 
 
 
+def http_get(url, headers, session, use_cache=True, cookies=None) -> str:
+    if use_cache:
+        # 简单的本地文件当缓存
+        filecache = FileCache.load_from(folder='.cache')
+        if hit := filecache.find(url):
+            return hit
+        else:
+            result = http_get(url, headers, session, use_cache=False, cookies=cookies)
+            return filecache.save(url, result)
+    else:
+        default_headers = {"User-Agent": "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.13 Safari/537.36"}
+        resp = session.get(url, headers={**default_headers, **headers}, cookies=cookies)
+        return resp.content.decode('utf-8')
+
+
+
 
 
 def async_fetch_images_sample():
