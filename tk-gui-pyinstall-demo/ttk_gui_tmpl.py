@@ -240,7 +240,7 @@ if __name__ == '__main__':
     gui.mainloop()
 
 # tkinterdnd2 with pyinstaller
-# https://pypi.org/project/tkinterdnd2/
+# 钩子文件 https://github.com/Eliav2/tkinterdnd2/blob/master/hook-tkinterdnd2.py
 # If you want to use pyinstaller, you should use the hook-tkinterdnd2.py file included.
 # Copy it in the base directory of your project, then:
 # `pyinstaller -F -w myproject/myproject.py --additional-hooks-dir=.`
