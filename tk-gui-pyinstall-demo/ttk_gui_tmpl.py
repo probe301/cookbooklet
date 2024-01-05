@@ -4,6 +4,7 @@
 import os
 import sys
 import logging
+import base64
 # Logging configuration
 logging.basicConfig(filename=__file__.replace('.py', '.log'),
                     level=logging.DEBUG,   # choose debug will show all logs
@@ -218,6 +219,18 @@ class GUI(tkinter.Frame):
 
 
 
+def make_stringify_ico(icopath):
+    # ico to b64 解决 tk 运行后只有默认叶子图标问题
+    # 与 pyinstaller 打包的文件 ico 无关
+    # https://blog.csdn.net/PengDW12/article/details/121401871
+    with open(icopath, "rb") as i:
+        b64str = base64.b64encode(i.read())
+    with open("icon.py", "w") as f:
+        f.write('class Icon(object):\n')
+        f.write('    def __init__(self):\n')
+        f.write(f"        self.img='{bytes.decode(b64str)}'")
+    print(f'ico {icopath} => icon.py done')
+# make_stringify_ico('card.ico')
 
 
 if __name__ == '__main__':
@@ -233,14 +246,32 @@ if __name__ == '__main__':
     root.lift()                         # 窗口置顶
     root.attributes('-topmost', True)   # 窗口置顶
 
+    from icon import Icon
+    with open('tmp.ico','wb') as tmp:
+        tmp.write(base64.b64decode(Icon().img))
+    root.iconbitmap('tmp.ico')
+    os.remove('tmp.ico')
+
     if os.path.exists('icon.ico'):
-        root.iconbitmap('icon.ico')
+        root.iconbitmap('icon.ico')  # 运行后 显示在左上角 ico
 
     gui = GUI(master=root)
     gui.mainloop()
+
+# pyinstaller 打包
+# pyinstaller -F -w -i card.ico ttk_gui_tmpl.py --additional-hooks-dir=.
+
+
+# note
 
 # tkinterdnd2 with pyinstaller
 # 钩子文件 https://github.com/Eliav2/tkinterdnd2/blob/master/hook-tkinterdnd2.py
 # If you want to use pyinstaller, you should use the hook-tkinterdnd2.py file included.
 # Copy it in the base directory of your project, then:
 # `pyinstaller -F -w myproject/myproject.py --additional-hooks-dir=.`
+
+# pyinstaller 打包报错
+# win32ctypes.pywin32.pywintypes.error: (225, '', '无法成功完成操作，因为文件包含病毒或潜在的垃圾软件。')
+# 将pyinstaller 6.3.0，卸载后，安装6.2.0重新打包即可
+# pip uninstall pyinstaller
+# pip install pyinstaller==6.2.0
