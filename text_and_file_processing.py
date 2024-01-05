@@ -361,19 +361,18 @@ def csv_load(path, sample=10, only_title=False, include=(), exclude=()):
 
 import csv
 def csv_save(filename, headers, data):
-  # 将 obj 存储到 csv
-  # headers = ['Symbol','Price','Date','Time','Change','Volume']
-  # rows = [('AA', 39.48, '6/11/2007', '9:36am', -0.18, 181800),
-  #          ('AIG', 71.38, '6/11/2007', '9:36am', -0.15, 195500),
-  #          ('AXP', 62.58, '6/11/2007', '9:36am', -0.46, 935000),
-  #        ]
-
-  with open(filename, 'w') as f:
-      f_csv = csv.writer(f)
-      f_csv.writerow(headers)
-      f_csv.writerows(data)
-
-
+    # 将 obj 存储到 csv
+    # headers = ['Symbol','Price','Date','Time','Change','Volume']
+    # rows = [('AA', 39.48, '6/11/2007', '9:36am', -0.18, 181800),
+    #          ('AIG', 71.38, '6/11/2007', '9:36am', -0.15, 195500),
+    #          ('AXP', 62.58, '6/11/2007', '9:36am', -0.46, 935000),
+    #        ]
+    with open(filename, 'w', newline='', encoding='utf_8_sig') as f:
+        # 必须 utf_8_sig 否则 Excel 中文乱码
+        # utf_8_sig 在 UTF-8 编码基础上添加了字节顺序标记（Byte Order Mark，BOM）
+        f_csv = csv.writer(f, lineterminator='\n')
+        f_csv.writerow(headers)
+        f_csv.writerows(data)
 
 
 

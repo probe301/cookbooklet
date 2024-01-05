@@ -25,8 +25,16 @@ except ImportError:
     from tkinter.scrolledtext import ScrolledText
 
 
-from TkinterDnD2 import *
+from tkinterdnd2 import TkinterDnD
 
+
+'''
+简化的 python GUI
+只支持 windows 版, 能打包 pyinstaller 在无编程环境运行即可
+GUI 支持拖放, 记录日志就行
+
+复杂 UI 应该考虑 web, gradio, streamlit 等
+'''
 
 class TextHandler(logging.Handler):
   def __init__(self, widget):
@@ -230,3 +238,9 @@ if __name__ == '__main__':
 
     gui = GUI(master=root)
     gui.mainloop()
+
+# tkinterdnd2 with pyinstaller
+# https://pypi.org/project/tkinterdnd2/
+# If you want to use pyinstaller, you should use the hook-tkinterdnd2.py file included.
+# Copy it in the base directory of your project, then:
+# `pyinstaller -F -w myproject/myproject.py --additional-hooks-dir=.`

@@ -41,6 +41,10 @@ def fitz_crop_pdf_page(page_num):
 
     # 裁剪指定区域
     rect0 = fitz.Rect(0, 0, 1000, 1425)
+    
+    # fitz.Matrix(300/72, 300/72) 可以提升出图质量
+    pix = page.get_pixmap(matrix=fitz.Matrix(300/72, 300/72), clip=rect0)
+    
     pix = page.get_pixmap(clip=rect0)
     pix.save('output.png')
 
