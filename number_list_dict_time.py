@@ -4,6 +4,12 @@
 --------------"""
 
 
+def findone(lst, cond, default=None):
+  '''选择列表中第一个匹配的元素'''
+  return next((x for x in lst if cond(x)), default)
+
+
+
 def dedupe(items, key=None):
   '''去除重复，可以保留原list的顺序'''
   seen = set()
@@ -65,6 +71,71 @@ def enumer(iterable, first=None, skip=0):
       break
     else:
       yield i, item
+
+
+
+class enume:
+  ''' 更好用的条件迭代器
+      usage
+        range(1, 100, 1) | enume(n=5)
+        range(1, 100, 1) | enume(n=5, skipn=1)
+  '''
+
+  def __init__(self, n=-1, skipn=0):
+    self.n = n
+    self.skipn = skipn
+  def __ror__(self, iterable):
+    for i, item in enumerate(iterable):
+      if self.skipn and i < self.skipn:
+        continue
+      if self.n > 0 and i >= self.n+self.skipn:
+        break
+      else:
+        yield i, item
+  def __str__(self):
+    return f'<enume object> n={self.n} skipn={self.skipn}'
+
+
+
+class enume_when:
+  ''' 更好用的条件迭代器
+      usage
+        range(1, 100, 1) | enume(start=lambda x: x>=3, end=lambda x: x%20==0)
+
+  '''
+
+  def __init__(self, start=None, end=None):
+
+    if start is None:
+      self.start = lambda x: True
+    elif not callable(start):
+      self.start = lambda x: x == start
+    else:
+      self.start = start
+
+    if end is None:
+      self.end = lambda x: False
+    elif not callable(end):
+      self.end = lambda x: x == end
+    else:
+      self.end = end
+
+  def __ror__(self, iterable):
+    flag = False
+    for i, item in enumerate(iterable):
+      if self.start(item):
+        flag = True
+      if self.end(item):   # 这里会贪婪匹配, 遇到连续的 end(item)==True 都会被匹配
+        yield i, item
+        flag = False
+
+      if flag:
+        yield i, item
+
+  def __str__(self):
+    return f'<enume_when object> start={self.start} end={self.end}'
+
+
 
 
 

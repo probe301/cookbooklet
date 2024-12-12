@@ -625,3 +625,18 @@ class should:
     else:  # 此时 raise Exception
       log.error(msg)
       raise AssertionError(msg)
+
+
+
+def loguru_usage():
+    from loguru import logger
+
+    # logger.add(
+    #     sys.stdout,
+    #     level="INFO",
+    #     format="{time:YYYY-MM-DD HH:mm} | {level} | {module}:{function}:{line} - {message}",
+    # )
+    logger.debug("This is a debug message1")
+    logger.info("This is an info message")
+    logger.warning("This is a warning message")
+    logger.error("This is an error message")

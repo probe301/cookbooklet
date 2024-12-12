@@ -65,6 +65,37 @@ def download_image2(url, folder, name, referer):
 
 
 
+
+sess = requests.Session()
+def download_image3(url, output_folder, image_name, referer):
+    # 先检查是否已经存在
+    # 使用 referer 
+    # 使用 socks proxies     # pip install requests[socks]
+    output_file = os.path.join(output_folder, image_name)
+    if os.path.exists(output_file):
+        print(f'{image_name} already exists, skip')
+        return
+
+    proxies = {
+        'http': 'socks5://127.0.0.1:1080',
+        'https': 'socks5://127.0.0.1:1080',
+    }
+    default_headers = {"User-Agent": "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.13 Safari/537.36"}
+    headers = {"Referer": referer}
+    print(f'download img {url} ...')
+
+    response = sess.get(url, headers={**default_headers, **headers}, stream=True, proxies=proxies)
+    if response.status_code == 200:
+        with open(output_file, 'wb') as f:
+            response.raw.decode_content = True
+            shutil.copyfileobj(response.raw, f)
+    print(f'  done download {output_file}')
+
+
+
+
+
+
 # requests with UA
 import requests
 session = requests.Session()
@@ -233,3 +264,48 @@ state_codes = '''
 driver = get_windows_firefox_driver()
 for state_code in state_codes[:3]:
   fetch_one_page(driver=driver, state_code=state_code)
+  
+
+
+def usage_diskcache():
+    '''基于文件的缓存用法'''
+    import feedparser
+    from diskcache import Cache
+    cache = Cache(directory='.cache')
+
+    def measure_time(func):
+        import time
+        def wrapper(*args, **kwargs):
+            start_time = time.time()
+            result = func(*args, **kwargs)
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+            print(f"{func.__name__} 耗时: {elapsed_time} 秒")
+            return result
+        return wrapper
+
+    @cache.memoize(typed=True, expire=1, tag='fib')
+    def fibonacci(number):
+        if number == 0:
+            return 0
+        elif number == 1:
+            return 1
+        else:
+            return fibonacci(number - 1) + fibonacci(number - 2)
+
+    @cache.memoize(typed=True, expire=3600, tag='feed')
+    def feed_craw(url):
+        return feedparser.parse(url)
+
+    @measure_time
+    def test_cache():
+        cache.stats(enable=True)  # 首先开启统计
+
+        print(sum(fibonacci(value) for value in range(35)))
+        data = feed_craw('https://forum-zh.obsidian.md/c/8-category/8.rss')
+        print(data.channel)
+
+        hits, misses = cache.stats(enable=False, reset=True)
+        print(f"stats {hits=}, {misses=}, {cache.volume()//1024}KB <{cache._directory}>")  # => hits=21, misses=3, 170KB <.cache>
+
+    test_cache()

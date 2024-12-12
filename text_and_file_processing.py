@@ -1179,3 +1179,29 @@ def detect_keyword(text, choices, default=None):
                 return choices.get(c)
         else:
             return choices.get(default)  # default 应改为 choices 的 key
+
+
+import html2text
+def html_to_md(html):
+    md = html2text.html2text(html, bodywidth=0)  
+    # bodywidth=None 会`在 78字符之后断行 导致较长的 [image](url) 失效
+    return md
+
+
+import jieba
+def truncate_by_token(text, limit=20, ellipsis='...', encoding='utf-8'):
+    '''按照语义切割词
+    截断字符串尾部, 保留指定长度
+    '''
+    text_length = lambda text: len(text.encode(encoding))
+    
+    if text_length(text) <= limit:
+        return text
+    else:
+        result = ''
+        seg_list = jieba.cut(text, cut_all=False)
+        while token := next(seg_list):
+            result += token
+            if text_length(result + ellipsis) >= limit:
+                return result + ellipsis
+        return result + ellipsis

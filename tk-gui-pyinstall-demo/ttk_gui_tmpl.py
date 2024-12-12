@@ -275,3 +275,10 @@ if __name__ == '__main__':
 # 将pyinstaller 6.3.0，卸载后，安装6.2.0重新打包即可
 # pip uninstall pyinstaller
 # pip install pyinstaller==6.2.0
+
+# 2024-02-03 测试于 miniconda 环境, 全是坑, 太难了, 放弃
+# 还是老实重新做一个 venv 吧
+# 参考 pyinstaller踩坑记，缺少依赖、打包错误或运行无效排查过程备忘 - 知乎
+# https://zhuanlan.zhihu.com/p/354609842
+# 如何将 Python 项目打包成 exe，另带卸载功能！
+# https://cloud.tencent.com/developer/news/1283061
